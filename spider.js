@@ -19,7 +19,7 @@ Spider.prototype.run = function(rules) {
                             this.run(rule);
                         });
                     } else {
-                        console.log("列表中不含网址规则,无法继续操作!");
+                        console.error("列表中不含网址规则,无法继续操作!");
                     }
                 } else {
                     this.one(one, jQuery, function(data) {
