@@ -10,6 +10,7 @@ var Spider = function(opts) {
 };
 
 Spider.prototype.run = function(rules) {
+    console.trace();
     console.time("[+] 规则运行时间.");
     this.once(rules || this.rules, function(once) {
         this.get(once.url, function(jQuery) {
@@ -36,6 +37,7 @@ Spider.prototype.run = function(rules) {
 };
 
 Spider.prototype.list = function(spider, $, cb) {
+    console.trace();
     $(spider.list).each(function(i, v) {
         var one = {};
         for (var k in spider.rule) {
@@ -65,6 +67,7 @@ Spider.prototype.list = function(spider, $, cb) {
 };
 
 Spider.prototype.one = function(spider, $, cb) {
+    console.trace();
     var one = {};
     for (var k in spider.rule) {
         switch (spider.rule[k].type) {
@@ -89,6 +92,7 @@ Spider.prototype.one = function(spider, $, cb) {
 };
 
 Spider.prototype.get = function(url, cb) {
+    console.trace();
     needle.get(url, function(err, res) {
         if (!err) {
             try {
@@ -107,6 +111,7 @@ Spider.prototype.more = function(list, cb) {
 };
 
 Spider.prototype.once = function(more, cb) {
+    console.trace();
     if (this.isArray(more)) {
         more.forEach(function(once) {
             cb(once);
@@ -117,6 +122,7 @@ Spider.prototype.once = function(more, cb) {
 };
 
 Spider.prototype.isArray = function(object) {
+    console.trace();
     return object && typeof object === 'object' && Array == object.constructor;
 };
 
