@@ -16,13 +16,15 @@ Spider.prototype.run = function(rules) {
                 if (one.list) {
                     if (one.rule.url) {
                         this.list(one, jQuery, function(rule) {
+                            console.info("[+] [" + once.url + "]运行规则: ", rule);
                             this.run(rule);
                         });
                     } else {
-                        console.error("列表中不含网址规则,无法继续操作!");
+                        console.error("[-] [" + once.url + "]列表中不含网址规则,无法继续操作!");
                     }
                 } else {
                     this.one(one, jQuery, function(data) {
+                        console.info("[+] [" + once.url + "]获取一条数据: ", data);
                         this.callback(data);
                     });
                 }
@@ -87,9 +89,13 @@ Spider.prototype.one = function(spider, $, cb) {
 Spider.prototype.get = function(url, cb) {
     needle.get(url, function(err, res) {
         if (!err) {
-            cb(cheerio.load(res.body));
+            try {
+                cb(cheerio.load(res.body));
+            } catch (e) {
+                console.error("[-] [" + url + "]页面处理失败: ", e);
+            }
         } else {
-            console.log(err);
+            console.log("[-] [" + url + "]网页访问错误: ", err);
         }
     });
 };
