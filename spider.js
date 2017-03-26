@@ -1,6 +1,7 @@
 var needle = require('needle');
 var cheerio = require('cheerio');
 var config = require('./config');
+var spawn = require("child_process").spawn;
 
 var Spider = function(opts) {
     this.rules = opts.rules || config;
