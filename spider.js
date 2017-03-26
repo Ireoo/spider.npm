@@ -6,7 +6,7 @@ var Spider = function(opts) {
     this.rules = opts.rules || config;
     this.callback = opts.callback;
     if (opts.run) this.run();
-    return this;
+    return Spider;
 };
 
 Spider.prototype.run = function(rules) {
@@ -38,6 +38,7 @@ Spider.prototype.run = function(rules) {
             });
         });
     });
+    return Spider;
 };
 
 Spider.prototype.list = function(spider, $, cb) {
