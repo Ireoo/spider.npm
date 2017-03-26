@@ -4,7 +4,7 @@
 
 exports = module.exports = [{
     title: 'default',
-    url: 'http://baidu.com',
+    url: 'http://baidu.com?s=',
     key: 'default',
     rules: [{
         list: '',
@@ -18,6 +18,8 @@ exports = module.exports = [{
                 text: ''
             }
         },
-        link: []
+        link: [{
+
+        }]
     }]
 }];
