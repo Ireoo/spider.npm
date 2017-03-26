@@ -10,6 +10,7 @@ var Spider = function(opts) {
 };
 
 Spider.prototype.run = function(rules) {
+    console.time("[+] 规则运行时间.");
     this.once(rules || this.rules, function(once) {
         this.get(once.url, function(jQuery) {
             this.once(once.rules, function(one) {
@@ -25,6 +26,7 @@ Spider.prototype.run = function(rules) {
                 } else {
                     this.one(one, jQuery, function(data) {
                         console.info("[+] [" + once.url + "]获取一条数据: ", data);
+                        console.timeEnd("[+] 规则运行时间.");
                         this.callback(data);
                     });
                 }
