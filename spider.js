@@ -31,51 +31,53 @@ Spider.prototype.run = function(rules) {
     });
 };
 
-Spider.prototype.list = function(rule, $, cb) {
-    $(rule.list).each(function(i, v) {
+Spider.prototype.list = function(spider, $, cb) {
+    $(spider.list).each(function(i, v) {
         var one = {};
-        for (var k in rule.rule) {
-            switch (rule.rule[k].type) {
+        for (var k in spider.rule) {
+            switch (spider.rule[k].type) {
                 case 'text':
-                    one[k] = v.find(rule.rule[k].text).text();
+                    one[k] = v.find(spider.rule[k].text).text();
                     break;
 
                 case 'html':
-                    one[k] = v.find(rule.rule[k].text).html();
+                    one[k] = v.find(spider.rule[k].text).html();
                     break;
 
                 case 'val':
-                    one[k] = v.find(rule.rule[k].text).val();
+                    one[k] = v.find(spider.rule[k].text).val();
                     break;
 
                 default:
-                    one[k] = v.find(rule.rule[k].text).attr(rule.rule[k].type);
+                    one[k] = v.find(spider.rule[k].text).attr(spider.rule[k].type);
                     break;
             }
         }
-        rule.link.url = one.url;
-        cb(rule);
+        this.once(spider.link, function(once) {
+            once.url = one.url;
+            cb(once);
+        });
     });
 };
 
-Spider.prototype.one = function(rule, $, cb) {
+Spider.prototype.one = function(spider, $, cb) {
     var one = {};
-    for (var k in rule.rule) {
-        switch (rule.rule[k].type) {
+    for (var k in spider.rule) {
+        switch (spider.rule[k].type) {
             case 'text':
-                one[k] = $(rule.rule[k].text).text();
+                one[k] = $(spider.rule[k].text).text();
                 break;
 
             case 'html':
-                one[k] = $(rule.rule[k].text).html();
+                one[k] = $(spider.rule[k].text).html();
                 break;
 
             case 'val':
-                one[k] = $(rule.rule[k].text).val();
+                one[k] = $(spider.rule[k].text).val();
                 break;
 
             default:
-                one[k] = $(rule.rule[k].text).attr(rule.rule[k].type);
+                one[k] = $(spider.rule[k].text).attr(spider.rule[k].type);
                 break;
         }
     }
