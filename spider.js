@@ -9,22 +9,50 @@ var Spider = function(opts) {
     return this;
 };
 
-Spider.prototype.rule = function(rules) {
+Spider.prototype.rule = function(rules, cb) {
     var r = rules || this.rules;
     r.forEach(function(v) {
         this.get(v.url, function($) {
-            this.one(v.rules, $);
+            this.one(v, $, cb);
         });
     });
 };
 
-Spider.prototype.one = function(rules, $) {
-    rules.forEach(function(rule) {
-        var list = [];
-        $(rule.list).each(function(i, v) {
+Spider.prototype.one = function(o, $, cb) {
+    o.rules.forEach(function(rule) {
+        if(rule.list) {
+            $(rule.list).each(function (i, v) {
+                var one = {};
+                var r = o.link;
+                for (var k in rule.rule) {
+                    switch (rule.rule[k].type) {
+                        case 'text':
+                            one[k] = v.find(rule.rule[k].text).text();
+                            break;
+
+                        case 'html':
+                            one[k] = v.find(rule.rule[k].text).html();
+                            break;
+
+                        case 'val':
+                            one[k] = v.find(rule.rule[k].text).val();
+                            break;
+
+                        default:
+                            one[k] = v.find(rule.rule[k].text).attr(rule.rule[k].type);
+                            break;
+                    }
+                }
+                this.run(r, function(data) {
+                    for(var k in data) {
+                        one[k] = data[k];
+                    }
+                    cb(one);
+                });
+            });
+        } else {
             var one = {};
             for (var k in rule.rule) {
-                // var a = rule.rule[k].split(' ');
                 switch (rule.rule[k].type) {
                     case 'text':
                         one[k] = v.find(rule.rule[k].text).text();
@@ -42,9 +70,9 @@ Spider.prototype.one = function(rules, $) {
                         one[k] = v.find(rule.rule[k].text).attr(rule.rule[k].type);
                         break;
                 }
-            };
-            list.push(one);
-        });
+            }
+            this.callback(one);
+        }
     });
 };
 

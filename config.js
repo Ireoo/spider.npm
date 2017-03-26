@@ -9,8 +9,14 @@ exports = module.exports = [{
     rules: [{
         list: '',
         rule: {
-            title: '',
-            url: ''
+            title: {
+                type: 'text',
+                text: ''
+            },
+            url: {
+                type: 'href',
+                text: ''
+            }
         },
         link: []
     }]
