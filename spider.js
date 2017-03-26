@@ -5,7 +5,7 @@ var config = require('./config');
 var Spider = function(opts) {
     this.rules = opts.rules || config;
     this.callback = opts.callback;
-    // if (opts.run) this.run();
+    if (opts.run) this.run();
     return this;
 };
 
