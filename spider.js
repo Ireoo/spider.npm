@@ -1,41 +1,54 @@
-/**
- * Created by S2 on 2017/3/17.
- */
-
 var needle = require('needle');
 var cheerio = require('cheerio');
 var config = require('./config');
 
-var spider = function(opts) {
+var Spider = function(opts) {
     this.rules = opts.rules || config;
-    this.cb = opts.cb;
-    if (opts.run) this.run();
+    this.callback = opts.callback;
+    // if (opts.run) this.run();
     return this;
 };
 
-spider.prototype.run = function(rules) {
+Spider.prototype.rule = function(rules) {
     var r = rules || this.rules;
     r.forEach(function(v) {
-        this.web(v.url, function($) {
+        this.get(v.url, function($) {
             this.one(v.rules, $);
         });
     });
 };
 
-spider.prototype.one = function(rules, $) {
+Spider.prototype.one = function(rules, $) {
     rules.forEach(function(rule) {
         var list = [];
         $(rule.list).each(function(i, v) {
             var one = {};
             for (var k in rule.rule) {
-                one[k] = v.find(rule.rule[k]).text();
+                // var a = rule.rule[k].split(' ');
+                switch (rule.rule[k].type) {
+                    case 'text':
+                        one[k] = v.find(rule.rule[k].text).text();
+                        break;
+
+                    case 'html':
+                        one[k] = v.find(rule.rule[k].text).html();
+                        break;
+
+                    case 'val':
+                        one[k] = v.find(rule.rule[k].text).val();
+                        break;
+
+                    default:
+                        one[k] = v.find(rule.rule[k].text).attr(rule.rule[k].type);
+                        break;
+                }
             };
             list.push(one);
         });
     });
 };
 
-spider.prototype.web = function(url, cb) {
+Spider.prototype.get = function(url, cb) {
     needle.get(url, function(err, res) {
         if (!err) {
             cb(cheerio.load(res.body));
@@ -45,4 +58,4 @@ spider.prototype.web = function(url, cb) {
     });
 };
 
-exports = module.exports = spider;
+exports = module.exports = Spider;
