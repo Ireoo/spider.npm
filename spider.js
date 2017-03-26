@@ -17,16 +17,20 @@ Spider.prototype.run = function(rules) {
             this.once(once.rules, function(one) {
                 if (one.list) {
                     if (one.rule.url) {
+                        console.info("[+] [" + once.url + "]运行规则中...");
+                        console.dir(one);
                         this.list(one, jQuery, function(rule) {
-                            console.info("[+] [" + once.url + "]运行规则: ", rule);
+                            console.info("[+] [" + once.url + "]运行规则完成.");
                             this.run(rule);
                         });
                     } else {
                         console.error("[-] [" + once.url + "]列表中不含网址规则,无法继续操作!");
                     }
                 } else {
+                    console.info("[+] [" + once.url + "]正在获取数据...");
                     this.one(one, jQuery, function(data) {
-                        console.info("[+] [" + once.url + "]获取一条数据: ", data);
+                        console.dir(data);
+                        console.info("[+] [" + once.url + "]获取数据完成.");
                         console.timeEnd("[+] 规则运行时间.");
                         this.callback(data);
                     });
