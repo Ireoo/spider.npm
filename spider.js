@@ -3,62 +3,46 @@
  */
 
 var needle = require('needle');
+var cheerio = require('cheerio');
+var config = require('./config');
 
 var spider = function(opts) {
-    var def = [{
-        title: 'default',
-        list: true,
-        url: 'http://baidu.com',
-        rule: [{
-            title: '',
-            url: '',
-            link: {
-                where: 'order', // ['order': '按照顺序，当第一条不存在内容时，进行下一个', 'repeat': '重复获取']
-                to: [{
-                title: 'default1',
-                list: false,
-                rule: [{
-                    title: '',
-                    content: '',
-                    url: '',
-                    link: {
-                        where: 'order',
-                        to: []
-                    }
-                }]
-            }]}
-        }]
-    }];
-    this.rule = opts.rule || def;
+    this.rules = opts.rules || config;
     this.cb = opts.cb;
-    if(opts.run) this.run();
+    if (opts.run) this.run();
     return this;
 };
 
-spider.prototype.run = function() {
-    this.rule.forEach(function(v, k, a) {
-        this.web(v.url, function(data) {
-            if(data) {
-                this.get(v, function(data) {
-
-                });
-            }
+spider.prototype.run = function(rules) {
+    var r = rules || this.rules;
+    r.forEach(function(v) {
+        this.web(v.url, function($) {
+            this.one(v.rules, $);
         });
     });
 };
 
-spider.prototype.get = function(i) {
-    if(i.list && i.list.length >= 1) {
-        i.list.forEach(function(v, k, a) {
-            this.web(v.url, function(data) {
-
-            });
+spider.prototype.one = function(rules, $) {
+    rules.forEach(function(rule) {
+        var list = [];
+        $(rule.list).each(function(i, v) {
+            var one = {};
+            for (var k in rule.rule) {
+                one[k] = v.find(rule.rule[k]).text();
+            };
+            list.push(one);
         });
-    }
+    });
 };
 
 spider.prototype.web = function(url, cb) {
-
+    needle.get(url, function(err, res) {
+        if (!err) {
+            cb(cheerio.load(res.body));
+        } else {
+            console.log(err);
+        }
+    });
 };
 
 exports = module.exports = spider;
