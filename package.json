@@ -1,6 +1,6 @@
 {
   "name": "spider.io",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "sipder network with nodejs",
   "main": "spider.js",
   "scripts": {
@@ -23,6 +23,7 @@
   "homepage": "https://github.com/Ireoo/spider.npm#readme",
   "dependencies": {
     "cheerio": "*",
+    "lodash": "*",
     "needle": "*"
   }
 }
