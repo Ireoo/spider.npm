@@ -1,6 +1,6 @@
 {
-    "name": "spidermap",
-    "version": "1.0.6",
+    "name": "spider.io",
+    "version": "1.0.0",
     "description": "sipder network with nodejs",
     "main": "spider.js",
     "scripts": {
@@ -11,7 +11,7 @@
         "url": "git+https://github.com/Ireoo/spider.npm.git"
     },
     "keywords": [
-        "spider"
+        "spider", "network spider", "网络采集工具"
     ],
     "author": "S2",
     "license": "MIT",
