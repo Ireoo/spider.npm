@@ -65,10 +65,14 @@ Spider.prototype.list = function(spider, $, cb) {
                     break;
             }
         }
-        this.once(spider.link, function(once) {
-            once.url = one.url;
-            cb(once);
-        });
+        if(spider.link) {
+            this.once(spider.link, function (once) {
+                once.url = one.url;
+                cb(once);
+            });
+        } else {
+            cb(false);
+        }
     });
 };
 
