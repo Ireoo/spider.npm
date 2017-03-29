@@ -5,17 +5,26 @@ var _ = require('lodash');
 var urlResolve = require('url').resolve;
 var spawn = require("child_process").spawn;
 
+var time = 3 * 1000;
+
+needle.defaults({
+    open_timeout: time,
+    read_timeout: time,
+    timeout: time,
+    user_agent: 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322)'
+});
+
 var Spider = function(opts) {
     Spider.prototype.rules = opts.rules || config;
     Spider.prototype.callback = opts.callback;
     Spider.prototype.init = opts.init || {
-            timeout: 1000
+            timeout: 3000
         };
     if (opts.run) Spider.prototype.run();
     return Spider;
 };
 
-Spider.prototype.run = function(rules) {
+Spider.prototype.run = function(rules, results) {
     Spider.prototype.once(rules || this.rules, function(once) {
         Spider.prototype.get(once.url, function(jQuery) {
             Spider.prototype.once(once.rules, function(one) {
@@ -23,19 +32,17 @@ Spider.prototype.run = function(rules) {
                     if (one.rule.url) {
                         console.info("[+] [" + once.url + "]运行规则中...");
                         // console.dir(one);
-                        Spider.prototype.list({spider: one, $: jQuery, url: once.url}, function(rule) {
-                            console.info("[+] [" + once.url + "]运行规则完成.");
-                            sleep(Spider.prototype.init.timeout);
-                            Spider.prototype.run(rule);
+                        Spider.prototype.list({spider: one, $: jQuery, url: once.url}, function(rule, result) {
+                            // sleep(Spider.prototype.init.timeout);
+                            Spider.prototype.run(rule, result);
                         });
                     } else {
                         console.error("[-] [" + once.url + "]列表中不含网址规则,无法继续操作!");
                     }
                 } else {
                     console.info("[+] [" + once.url + "]正在获取数据...");
-                    Spider.prototype.one({spider: one, $: jQuery}, function(data) {
-                        // console.dir(data);
-                        console.info("[+] [" + once.url + "]获取数据完成.");
+                    Spider.prototype.one({spider: one, $: jQuery, result: results}, function(data) {
+                        console.info("[+] [" + data.url + "]获取数据完成.");
                         Spider.prototype.callback(data);
                     });
                 }
@@ -46,7 +53,6 @@ Spider.prototype.run = function(rules) {
 };
 
 Spider.prototype.list = function(options, cb) {
-    // console.trace();
     options.$(options.spider.list).each(function() {
         var one = {};
         for (var k in options.spider.rule) {
@@ -68,13 +74,16 @@ Spider.prototype.list = function(options, cb) {
                     break;
             }
         }
-        // console.log(one);
         if(options.spider.link) {
             Spider.prototype.once(options.spider.link, function (once) {
-                sleep(Spider.prototype.init.timeout);
-                console.log(one.url);
-                once.url = url(options.url, one.url);
-                cb(once);
+                // stop = true;
+                // while (!stop) {
+                //     console.log(stop);
+                // }
+                // sleep(Spider.prototype.init.timeout);
+                // console.log(one.url);
+                once.url = one.url = url(options.url, one.url);
+                cb(once, one);
             });
         } else {
             cb(false);
@@ -104,6 +113,7 @@ Spider.prototype.one = function(options, cb) {
                 break;
         }
     }
+    one = _.extend(options.result, one);
     cb(one);
 };
 

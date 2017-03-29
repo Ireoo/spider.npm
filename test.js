@@ -8,7 +8,7 @@ var spider = require('./spider');
 spider({
     rules: [{
         title: '破晓列表',
-        url: 'http://www.poxiao.com/',
+        url: 'http://www.ffdy.cc/index.php',
         rules: [{
             list: 'div#indextopleft div ul li',
             rule: {
