@@ -113,7 +113,7 @@ Spider.prototype.one = function(options, cb) {
                 break;
         }
     }
-    one = _.extend(options.result, one);
+    one = _.merge(options.result, one);
     cb(one);
 };
 
