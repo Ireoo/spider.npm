@@ -1,9 +1,9 @@
 var needle = require('needle');
 var cheerio = require('cheerio');
 var config = require('./config');
-var spawn = require("child_process").spawn;
 var _ = require('lodash');
 var urlResolve = require('url').resolve;
+var spawn = require("child_process").spawn;
 
 var Spider = function(opts) {
     Spider.prototype.rules = opts.rules || config;
@@ -136,4 +136,4 @@ exports = module.exports = Spider;
 
 function url(url, t) {
     return /^https?:/.test(t) ? this : urlResolve(url, t);
-};
+}
