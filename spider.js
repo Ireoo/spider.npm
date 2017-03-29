@@ -8,6 +8,9 @@ var spawn = require("child_process").spawn;
 var Spider = function(opts) {
     Spider.prototype.rules = opts.rules || config;
     Spider.prototype.callback = opts.callback;
+    Spider.prototype.init = opts.init || {
+            timeout: 1000
+        };
     if (opts.run) Spider.prototype.run();
     return Spider;
 };
@@ -22,6 +25,7 @@ Spider.prototype.run = function(rules) {
                         // console.dir(one);
                         Spider.prototype.list({spider: one, $: jQuery, url: once.url}, function(rule) {
                             console.info("[+] [" + once.url + "]运行规则完成.");
+                            sleep(Spider.prototype.init.timeout);
                             Spider.prototype.run(rule);
                         });
                     } else {
@@ -67,6 +71,7 @@ Spider.prototype.list = function(options, cb) {
         // console.log(one);
         if(options.spider.link) {
             Spider.prototype.once(options.spider.link, function (once) {
+                sleep(Spider.prototype.init.timeout);
                 console.log(one.url);
                 once.url = url(options.url, one.url);
                 cb(once);
@@ -136,4 +141,10 @@ exports = module.exports = Spider;
 
 function url(url, t) {
     return /^https?:/.test(t) ? this : urlResolve(url, t);
+}
+
+function sleep(delay) {
+    var start = new Date().getTime();
+    var sleep = delay || 200;
+    while (new Date().getTime() < start + sleep) {}
 }
