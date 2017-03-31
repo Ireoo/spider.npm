@@ -1,6 +1,6 @@
 {
   "name": "spider.io",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "sipder network with nodejs",
   "main": "spider.js",
   "scripts": {

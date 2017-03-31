@@ -85,7 +85,9 @@ Spider.prototype.list = function(options, cb) {
         list.push(one);
     });
     if(!options.spider.link) {
-        list = _.merge(options.result, {list: list});
+        var l = {};
+        l[options.spider.key] = list;
+        list = _.merge(options.result, l);
         cb(false, list);
     }
 };

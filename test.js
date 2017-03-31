@@ -31,6 +31,7 @@ spider({
                         }
                     }
                 },{
+                    key : 'download',
                     list: 'div.resourcesmain table tr',
                     rule: {
                         title: {
