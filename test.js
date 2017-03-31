@@ -8,7 +8,7 @@ var spider = require('./spider');
 spider({
     rules: [{
         title: '破晓列表',
-        url: 'http://www.ffdy.cc/index.php',
+        url: 'http://www.poxiao.com/',
         rules: [{
             list: 'div#indextopleft div ul li',
             rule: {
@@ -25,13 +25,21 @@ spider({
                             type: 'text',
                             text: 'h1'
                         },
-                        address: {
-                            type: 'thunderhref',
-                            text: 'div.resourcesmain table tbody tr td a'
-                        },
                         content: {
                             type: 'text',
                             text: 'div.filmcontents p'
+                        }
+                    }
+                },{
+                    list: 'div.resourcesmain table tr',
+                    rule: {
+                        title: {
+                            type: 'text',
+                            text: 'a'
+                        },
+                        address: {
+                            type: 'val',
+                            text: 'input'
                         }
                     }
                 }]
@@ -39,7 +47,7 @@ spider({
         }]
     }],
     callback: function(data) {
-        console.log(data);
+        console.log('>>> ', data);
     },
     run: true
 });

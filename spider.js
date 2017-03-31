@@ -18,7 +18,7 @@ var Spider = function(opts) {
     Spider.prototype.rules = opts.rules || config;
     Spider.prototype.callback = opts.callback;
     Spider.prototype.init = opts.init || {
-            timeout: 3000
+            delay: 3000
         };
     if (opts.run) Spider.prototype.run();
     return Spider;
@@ -29,16 +29,16 @@ Spider.prototype.run = function(rules, results) {
         Spider.prototype.get(once.url, function(jQuery) {
             Spider.prototype.once(once.rules, function(one) {
                 if (one.list) {
-                    if (one.rule.url) {
-                        console.info("[+] [" + once.url + "]运行规则中...");
-                        // console.dir(one);
-                        Spider.prototype.list({spider: one, $: jQuery, url: once.url}, function(rule, result) {
-                            // sleep(Spider.prototype.init.timeout);
+                    console.info("[+] [" + once.url + "]运行规则中...");
+                    // console.dir(one);
+                    Spider.prototype.list({spider: one, $: jQuery, url: once.url, result: results}, function(rule, result) {
+                        // sleep(Spider.prototype.init.delay);
+                        if(rule) {
                             Spider.prototype.run(rule, result);
-                        });
-                    } else {
-                        console.error("[-] [" + once.url + "]列表中不含网址规则,无法继续操作!");
-                    }
+                        } else {
+                            Spider.prototype.callback(result);
+                        }
+                    });
                 } else {
                     console.info("[+] [" + once.url + "]正在获取数据...");
                     Spider.prototype.one({spider: one, $: jQuery, result: results}, function(data) {
@@ -53,6 +53,7 @@ Spider.prototype.run = function(rules, results) {
 };
 
 Spider.prototype.list = function(options, cb) {
+    var list = [];
     options.$(options.spider.list).each(function() {
         var one = {};
         for (var k in options.spider.rule) {
@@ -76,19 +77,17 @@ Spider.prototype.list = function(options, cb) {
         }
         if(options.spider.link) {
             Spider.prototype.once(options.spider.link, function (once) {
-                // stop = true;
-                // while (!stop) {
-                //     console.log(stop);
-                // }
-                // sleep(Spider.prototype.init.timeout);
-                // console.log(one.url);
+                // sleep(Spider.prototype.init.delay);
                 once.url = one.url = url(options.url, one.url);
                 cb(once, one);
             });
-        } else {
-            cb(false);
         }
+        list.push(one);
     });
+    if(!options.spider.link) {
+        list = _.merge(options.result, {list: list});
+        cb(false, list);
+    }
 };
 
 Spider.prototype.one = function(options, cb) {

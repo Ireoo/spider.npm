@@ -7,7 +7,7 @@ var spider = require('spider.io');
 spider({
     init: {
         debug: true, // 调试输出
-        daley: 200  // 单个操作延迟
+        delay: 200  // 单个操作延迟
     },
     rules: [{
         title: '破晓列表',
@@ -53,7 +53,7 @@ var spider = require('spider.io');
 spider({
     init: {
         debug: true, // 调试输出
-        daley: 200  // 单个操作延迟
+        delay: 200  // 单个操作延迟
     },
     callback: function(data) {
         console.log(data);
@@ -91,3 +91,5 @@ spider({
     }]
 }]);
 ```
+
+## 参数说明
