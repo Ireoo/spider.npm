@@ -18,8 +18,8 @@ var Spider = function(opts) {
     Spider.prototype.rules = opts.rules || config;
     Spider.prototype.callback = opts.callback;
     Spider.prototype.init = opts.init || {
-            delay: 3000
-        };
+        delay: 3000
+    };
     if (opts.run) Spider.prototype.run();
     return Spider;
 };
@@ -31,9 +31,9 @@ Spider.prototype.run = function(rules, results) {
                 if (one.list) {
                     console.info("[+] [" + once.url + "]运行规则中...");
                     // console.dir(one);
-                    Spider.prototype.list({spider: one, $: jQuery, url: once.url, result: results}, function(rule, result) {
+                    Spider.prototype.list({ spider: one, $: jQuery, url: once.url, result: results }, function(rule, result) {
                         // sleep(Spider.prototype.init.delay);
-                        if(rule) {
+                        if (rule) {
                             Spider.prototype.run(rule, result);
                         } else {
                             Spider.prototype.callback(result);
@@ -41,7 +41,7 @@ Spider.prototype.run = function(rules, results) {
                     });
                 } else {
                     console.info("[+] [" + once.url + "]正在获取数据...");
-                    Spider.prototype.one({spider: one, $: jQuery, result: results}, function(data) {
+                    Spider.prototype.one({ spider: one, $: jQuery, result: results }, function(data) {
                         console.info("[+] [" + data.url + "]获取数据完成.");
                         Spider.prototype.callback(data);
                     });
@@ -75,8 +75,8 @@ Spider.prototype.list = function(options, cb) {
                     break;
             }
         }
-        if(options.spider.link) {
-            Spider.prototype.once(options.spider.link, function (once) {
+        if (options.spider.link) {
+            Spider.prototype.once(options.spider.link, function(once) {
                 // sleep(Spider.prototype.init.delay);
                 once.url = one.url = url(options.url, one.url);
                 cb(once, one);
@@ -84,7 +84,7 @@ Spider.prototype.list = function(options, cb) {
         }
         list.push(one);
     });
-    if(!options.spider.link) {
+    if (!options.spider.link) {
         var l = {};
         l[options.spider.key] = list;
         list = _.merge(options.result, l);

@@ -30,8 +30,8 @@ spider({
                             text: 'div.filmcontents p'
                         }
                     }
-                },{
-                    key : 'download',
+                }, {
+                    key: 'download',
                     list: 'div.resourcesmain table tr',
                     rule: {
                         title: {
