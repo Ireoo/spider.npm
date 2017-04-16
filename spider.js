@@ -3,7 +3,9 @@ var cheerio = require('cheerio');
 var config = require('./config');
 var _ = require('lodash');
 var urlResolve = require('url').resolve;
-var spawn = require("child_process").spawn;
+var Queue = require('promise-queue-plus');
+
+
 
 var time = 3 * 1000;
 
@@ -15,11 +17,18 @@ needle.defaults({
 });
 
 var Spider = function(opts) {
+    Spider.prototype.init = _.merge(opts.init, {
+        delay: 100,
+        threads: 10
+    });
+    Spider.prototype.q = Queue.Promise;
+    Spider.prototype.Q = new Queue(Spider.prototype.init.threads, {
+        "retry": 0,
+        "retryIsJump": false,
+        "timeout": 0
+    });
     Spider.prototype.rules = opts.rules || config;
     Spider.prototype.callback = opts.callback;
-    Spider.prototype.init = opts.init || {
-        delay: 3000
-    };
     if (opts.run) Spider.prototype.run();
     return Spider;
 };
@@ -31,7 +40,12 @@ Spider.prototype.run = function(rules, results) {
                 if (one.list) {
                     console.info("[+] [" + once.url + "]运行规则中...");
                     // console.dir(one);
-                    Spider.prototype.list({ spider: one, $: jQuery, url: once.url, result: results }, function(rule, result) {
+                    Spider.prototype.list({
+                        spider: one,
+                        $: jQuery,
+                        url: once.url,
+                        result: results
+                    }, function(rule, result) {
                         // sleep(Spider.prototype.init.delay);
                         if (rule) {
                             Spider.prototype.run(rule, result);
@@ -41,7 +55,11 @@ Spider.prototype.run = function(rules, results) {
                     });
                 } else {
                     console.info("[+] [" + once.url + "]正在获取数据...");
-                    Spider.prototype.one({ spider: one, $: jQuery, result: results }, function(data) {
+                    Spider.prototype.one({
+                        spider: one,
+                        $: jQuery,
+                        result: results
+                    }, function(data) {
                         console.info("[+] [" + data.url + "]获取数据完成.");
                         Spider.prototype.callback(data);
                     });
@@ -147,6 +165,20 @@ Spider.prototype.once = function(more, cb) {
     }
 };
 
+Spider.prototype.queue = function(url) {
+    queue1.go(function(uri) {
+        new Promise(function(resolve, reject) {
+            if (Spider.prototype.init.delay == 0) {
+                resolve(uri);
+            } else {
+                setTimeout(function() {
+                    resolve(uri);
+                }, Spider.prototype.init.delay);
+            }
+        });
+    }, [url]).then(console.log);
+};
+
 
 exports = module.exports = Spider;
 
@@ -158,4 +190,12 @@ function sleep(delay) {
     var start = new Date().getTime();
     var sleep = delay || 200;
     while (new Date().getTime() < start + sleep) {}
+}
+
+function testfun(i) {
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            resolve(i)
+        }, 300)
+    })
 }
