@@ -26,6 +26,6 @@
     "cheerio": "*",
     "lodash": "*",
     "needle": "*",
-    "queue-fun": "*"
+    "promise-queue-plus": "*"
   }
 }

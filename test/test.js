@@ -1,24 +1,28 @@
 /**
  * Created by Ireoo on 2017/3/28.
  */
-"use strict"
+"use strict";
 
-var Spider = require('../spider.js');
+var Spider = require('../net.js');
 
 // console.profile('性能分析器');
 var spider = new Spider({
 	init: {
-		// debug: true
+		debug: true
 	},
 	rules: [{
 		title: '破晓列表',
-		url: 'http://www.poxiao.com/',
+		url: 'http://www.iqiyi.com/lib/dianying/%2C%2C_4_1.html',
 		rules: [{
-			list: 'div#indextopleft div ul li',
+			list: 'ul.site-piclist li',
 			rule: {
 				url: {
 					type: 'href',
 					text: 'a'
+				},
+				title: {
+					type: 'text',
+					text: 'p.site-piclist_info_title a'
 				}
 			},
 			link: [{
@@ -27,24 +31,20 @@ var spider = new Spider({
 					rule: {
 						title: {
 							type: 'text',
-							text: 'h1'
+							text: 'h1.main_title a'
 						},
 						content: {
 							type: 'text',
-							text: 'div.filmcontents p'
+							text: 'div.mod-body.introduce-info p'
 						}
 					}
 				}, {
-					key: 'download',
-					list: 'div.resourcesmain table tr',
+					key: 'image',
+					list: 'ul.site-piclist.search-piclist-100100 li',
 					rule: {
-						title: {
-							type: 'text',
-							text: 'a'
-						},
 						address: {
-							type: 'val',
-							text: 'input'
+							type: 'src',
+							text: 'img'
 						}
 					}
 				}]
@@ -52,7 +52,7 @@ var spider = new Spider({
 		}]
 	}],
 	callback: function(data) {
-		console.log('>>> ', data.title);
+		console.log('>>> ', JSON.stringify(data));
 	},
 	run: true
 });
