@@ -22,11 +22,10 @@
   },
   "homepage": "https://github.com/Ireoo/spider.npm#readme",
   "dependencies": {
-    "Q": "0.0.1",
-    "async": "^2.3.0",
+    "async": "*",
     "cheerio": "*",
     "lodash": "*",
     "needle": "*",
-    "q": "^1.5.0"
+    "queue-fun": "*"
   }
 }
