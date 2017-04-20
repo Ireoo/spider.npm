@@ -46,7 +46,7 @@ class Spider {
                     if (one.list) {
                         if (Spider.prototype.init.debug) console.info("[+] [" + once.url + "]运行规则中...");
                         // console.dir(one);
-                        Spider.prototype.list(one, html, function(o, data) {
+                  node.bcrypt.js      Spider.prototype.list(one, html, function(o, data) {
                             // console.log(o);
                             // sleep(this.init.delay);
                             if (!one.link) {
