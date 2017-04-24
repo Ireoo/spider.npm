@@ -5,174 +5,295 @@ var cheerio = require('cheerio');
 var config = require('./config');
 var _ = require('lodash');
 var urlResolve = require('url').resolve;
-
-
-
-var time = 3 * 1000;
-
-needle.defaults({
-    open_timeout: time,
-    read_timeout: time,
-    timeout: time,
-    user_agent: 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322)'
-});
+var async = require('async');
+var Queue = require('promise-queue-plus');
 
 class Spider {
-    constructor(opts) {
-        Spider.prototype.init = _.merge({
-            debug: false,
-            delay: 0,
-            threads: 1
-        }, opts.init);
-        Spider.prototype.callback = opts.callback;
-        if (opts.run) Spider.prototype.run(opts.rules);
+    constructor(options) {
+        if(options) {
+            this.init = _.merge({
+                debug: true,
+                delay: 3000,
+                timeout: 3000,
+                threads: 1,
+                retry: 1,
+                retryIsJump: true
+            }, options.init);
+            if (options.callback) this.cb = options.callback;
+        } else {
+            this.init = {
+                debug: true,
+                delay: 3000,
+                timeout: 3000,
+                threads: 1,
+                retry: 1,
+                retryIsJump: true
+            };
+            this.cb = function() {}
+        }
+        //实列化一个最大并发为1的队列
+        this.queue = new Queue(this.init.threads,{
+            "queueStart": function(queue){}
+            ,"queueEnd": function(queue){}
+            ,"workAdd": function(item, queue){}
+            ,"workResolve": function(value, queue){}
+            ,"workReject": function(reason, queue){}
+            ,"workFinally": function(queue){}
+            ,"retry": this.init.retry               //Number of retries
+            ,"retryIsJump": this.init.retryIsJump     //retry now?
+            ,"timeout": this.init.timeout           //The timeout period
+        });
+        needle.defaults({
+            // open_timeout: this.init.timeout,
+            // read_timeout: this.init.timeout,
+            // timeout: this.init.timeout,
+            user_agent: 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322)'
+        });
+        if (options.run) this.run(options.links);
+        return this;
     }
 
-    run(rules, data) {
-        if (data === undefined) data = {};
-        // console.log(rules, data);
-        if (!rules && !data) {
-            console.log('没有规则,将启动测试程序!');
-        }
-        this.once({
-            rules: rules || config,
-            data: data
-        }, function(once) {
+    run(links, input) {
+        var t = this;
+        // var data = {};
+        // if(input) data = input;
+        t.once(links, function(once) {
             // console.log(once);
-            Spider.prototype.get(once.url, once, function(once, html) {
-                // console.log(once);
-                Spider.prototype.once(once, function(one) {
-                    // console.log(one);
-                    if (one.list) {
-                        if (Spider.prototype.init.debug) console.info("[+] [" + once.url + "]运行规则中...");
-                        // console.dir(one);
-                        Spider.prototype.list(one, html, function(o, data) {
-                            // console.log(o);
-                            // sleep(this.init.delay);
-                            if (!one.link) {
-                                // Spider.prototype.callback(data);
+            t.html(once.url, function($) {
+                // console.log(once.link);
+                var d = t.rule(once.url, once.rules, $, input);
+                if(d !== undefined) t.cb(d);
+                /**
+                 t.once(once.rules, function(rule) {
+                    if(rule.list) {
+                        var list = t.list(rule, $);
+                        list.forEach(function(li) {
+                            if(li.url) {
+                                li.url = t.url(once.url, li.url);
+                                if(rule.link) {
+                                    t.once(rule.link, function(rule) {
+                                        rule.url = li.url;
+                                        // console.log(rule, li);
+                                        if(!rule.key) {
+                                            t.run(rule, li);
+                                        }
+                                    });
+                                }
                             }
                         });
                     } else {
-                        if (Spider.prototype.init.debug) console.info("[+] [" + once.url + "]正在获取数据...");
-                        Spider.prototype.one(once.url, one, html, function(data) {
-                            if (Spider.prototype.init.debug) console.info("[+] [" + data.url + "]获取数据完成.");
-                            Spider.prototype.callback(data);
-                        });
+                        var d = _.merge(data, t.data(rule, $));
+                        t.cb(d);
+                        // console.log(JSON.stringify(data));
                     }
                 });
+                 */
+            });
+            // await t.sleep();
+        });
+    }
+
+    rule(url, rules, $, d) {
+        var t = this;
+        var list = {}, data = {};
+        if(_.isArray(rules)) {
+            for (var i in rules) {
+                var rule = rules[i];
+                if (rule.list) {
+                    if (rule.key) {
+                        list[rule.key] = t.list(rule, $);
+                        if (d) {
+                            d = _.merge(d, list);
+                        } else {
+                            d = list;
+                        }
+                    } else {
+                        list = t.list(rule, $);
+                        list.forEach(function (li) {
+                            if (li.url) {
+                                li.url = t.url(url, li.url);
+                                if (rule.links) {
+                                    t.once(rule.links, function (r) {
+                                        r.url = li.url;
+                                        // console.log(rule, li);
+                                        if (!r.key) {
+                                            t.run(r, li);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    data = t.data(rule, $);
+                    if (d) {
+                        d = _.merge(d, data);
+                    } else {
+                        d = data;
+                    }
+                }
+            }
+        } else {
+            var rule = rules;
+            if (rule.list) {
+                if (rule.key) {
+                    list[rule.key] = t.list(rule, $);
+                    if (d) {
+                        d = _.merge(d, list);
+                    } else {
+                        d = list;
+                    }
+                } else {
+                    list = t.list(rule, $);
+                    list.forEach(function (li) {
+                        if (li.url) {
+                            li.url = t.url(url, li.url);
+                            if (rule.links) {
+                                t.once(rule.links, function (r) {
+                                    r.url = li.url;
+                                    // console.log(rule, li);
+                                    if (!r.key) {
+                                        t.run(r, li);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            } else {
+                data = t.data(rule, $);
+                if (d) {
+                    d = _.merge(d, data);
+                } else {
+                    d = data;
+                }
+            }
+        }
+        return d;
+    }
+
+    link(link, data) {
+        var t = this;
+        t.html(link.url, function($) {
+            t.once(link.rules, function(rule) {
+                if(rule.list) {
+                    var list = t.list(rule, $);
+                    list.forEach(function(li) {
+                        if(li.url) {
+                            li.url = t.url(link.url, li.url);
+                            if(rule.link) {
+                                t.run(rule.link, li);
+                            }
+                        }
+                    });
+                    if(!rule.link) {
+                        t.cb(list);
+                    }
+                } else {
+                    var d = _.merge(data, t.data(rule, $));
+                    t.cb(d);
+                    // console.log(JSON.stringify(data));
+                }
             });
         });
     }
 
-    list(one, $, cb) {
-        // console.log(one);
+    list(rules, $) {
+        var t = this;
         var list = [];
-        $(one.list).each(function() {
-            var o = {};
-            for (var k in one.rule) {
-                switch (one.rule[k].type) {
+        $(rules.list).each(function() {
+            var one = {};
+            // rules.rule.forEach(function(v, k) {
+            for( var k in rules.rule) {
+                switch (rules.rule[k].type) {
                     case 'text':
-                        o[k] = $(this).find(one.rule[k].text).text();
+                        one[k] = $(this).find(rules.rule[k].text).text();
                         break;
 
                     case 'html':
-                        o[k] = $(this).find(one.rule[k].text).html();
+                        one[k] = $(this).find(rules.rule[k].text).html();
                         break;
 
                     case 'val':
-                        o[k] = $(this).find(one.rule[k].text).val();
+                        one[k] = $(this).find(rules.rule[k].text).val();
                         break;
 
                     default:
-                        o[k] = $(this).find(one.rule[k].text).attr(one.rule[k].type);
+                        one[k] = $(this).find(rules.rule[k].text).attr(rules.rule[k].type);
                         break;
                 }
             }
-            list.push(o);
+            list.push(one);
         });
-        if (!one.link) {
-            var l = {};
-            l[one.key] = list;
-            list = _.merge(one.data, l);
-            cb(one, list);
-        } else {
-            list.forEach(function(li) {
-                if (li.url) {
-                    // console.log({ url: url(one.url, li.url), rules: one.link });
-                    for (var i in one.link) {
-                        one.link[i].url = Spider.prototype.url(one.url, li.url);
-                    }
-                    Spider.prototype.run(one.link, one.data);
-                }
-            });
-        }
+        return list;
     }
 
-    one(url, one, $, cb) {
-        // console.trace();
-        var o = {};
-        for (var k in one.rule) {
-            switch (one.rule[k].type) {
+    data(rules, $) {
+        // console.log(rules);
+        var one = {};
+        // rules.rule.forEach(function(v, k) {
+        for(var k in rules.rule) {
+            switch (rules.rule[k].type) {
                 case 'text':
-                    o[k] = $(one.rule[k].text).text();
+                    one[k] = $(rules.rule[k].text).text();
                     break;
 
                 case 'html':
-                    o[k] = $(one.rule[k].text).html();
+                    one[k] = $(rules.rule[k].text).html();
                     break;
 
                 case 'val':
-                    o[k] = $(one.rule[k].text).val();
+                    one[k] = $(rules.rule[k].text).val();
                     break;
 
                 default:
-                    o[k] = $(one.rule[k].text).attr(one.rule[k].type);
+                    one[k] = $(rules.rule[k].text).attr(rules.rule[k].type);
                     break;
             }
         }
-        // console.log(one);
-        o = _.merge(one.data, o);
-        o.url = url;
-        // console.log(o);
-        cb(o);
-    }
-
-    get(url, source, cb) {
-        // console.log(url);
-        if (Spider.prototype.init.debug) console.time("[+] [" + url + "]网页获取时间");
-        needle.get(url, function(err, res) {
-            // console.log(url, source);
-            if (!err) {
-                try {
-                    if (Spider.prototype.init.debug) console.info("[+] [" + url + "]页面处理完成.");
-                    source.url = url;
-                    cb(source, cheerio.load(res.body));
-                } catch (e) {
-                    if (Spider.prototype.init.debug) console.error("[-] [" + url + "]页面处理失败: ", e);
-                }
-            } else {
-                if (Spider.prototype.init.debug) console.error("[-] [" + url + "]网页访问错误: ", err);
-            }
-            if (Spider.prototype.init.debug) console.timeEnd("[+] [" + url + "]网页获取时间");
-        });
+        // var l = {};
+        // l[rules.rule.key] = one;
+        return one;
     }
 
     once(more, cb) {
-        if (_.isArray(more.rules)) {
-            more.rules.forEach(function(once) {
-                // console.info(once);
-                if (!once.url) once.url = more.url;
-                once.data = more.data;
+        if(_.isArray(more)) {
+            more.forEach(function(once) {
                 cb(once);
             });
         } else {
-            // console.info(more);
-            var rule = more.rules;
-            rule.url = more.url;
-            rule.data = more.data;
-            cb(rule);
+            cb(more);
         }
+    }
+
+    html(url, cb) {
+        var t = this;
+        if (t.init.debug) console.time("[+] [" + url + "]网页获取时间");
+        this.queue.go(t.thread_get_html,[url]).then(function(data) {
+            if (t.init.debug) console.timeEnd("[+] [" + url + "]网页获取时间");
+            cb(data);
+        }, function(err) {
+            console.error("[-] [" + url + "]获取失败,重试中!!!");
+            t.html(url, cb);
+        });
+        // await this.thread_get_html(url).then(cb);
+    }
+
+    thread_get_html(url) {
+        return new Promise(function (resolve, reject) {
+            needle.get(url, function(err, res) {
+                if(!err) resolve(cheerio.load(res.body));
+            });
+        });
+    }
+
+    sleep() {
+        var t = this;
+        return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                resolve();
+            }, t.init.delay);
+        });
     }
 
     url(url, t) {

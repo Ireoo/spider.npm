@@ -2,7 +2,7 @@
 
 var needle = require('needle');
 var cheerio = require('cheerio');
-var config = require('./config');
+var config = require('../config');
 var _ = require('lodash');
 var urlResolve = require('url').resolve;
 var async = require('async');
@@ -15,7 +15,9 @@ class net {
                 debug: true,
                 delay: 3000,
                 timeout: 3000,
-                threads: 1
+                threads: 1,
+                retry: 1,
+                retryIsJump: true
             }, options.init);
             if (options.callback) this.cb = options.callback;
         } else {
@@ -23,7 +25,9 @@ class net {
                 debug: true,
                 delay: 3000,
                 timeout: 3000,
-                threads: 1
+                threads: 1,
+                retry: 1,
+                retryIsJump: true
             };
             this.cb = function() {}
         }
@@ -35,28 +39,31 @@ class net {
             ,"workResolve": function(value, queue){}
             ,"workReject": function(reason, queue){}
             ,"workFinally": function(queue){}
-            ,"retry": 1               //Number of retries
-            ,"retryIsJump": true     //retry now?
-            ,"timeout": 1000           //The timeout period
+            ,"retry": this.init.retry               //Number of retries
+            ,"retryIsJump": this.init.retryIsJump     //retry now?
+            ,"timeout": this.init.timeout           //The timeout period
         });
         needle.defaults({
-            open_timeout: this.init.timeout,
-            read_timeout: this.init.timeout,
-            timeout: this.init.timeout,
+            // open_timeout: this.init.timeout,
+            // read_timeout: this.init.timeout,
+            // timeout: this.init.timeout,
             user_agent: 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322)'
         });
-        if (options.run) this.run(options.rules);
+        if (options.run) this.run(options.links);
         return this;
     }
 
     run(links, input) {
         var t = this;
-        var data = {};
-        if(input) data = input;
+        // var data = {};
+        // if(input) data = input;
         t.once(links, function(once) {
             // console.log(once);
             t.html(once.url, function($) {
                 // console.log(once.link);
+                var d = t.rule(once.url, once.rules, $, input);
+                if(d !== undefined) t.cb(d);
+                /**
                 t.once(once.rules, function(rule) {
                     if(rule.list) {
                         var list = t.list(rule, $);
@@ -80,19 +87,89 @@ class net {
                         // console.log(JSON.stringify(data));
                     }
                 });
+                 */
             });
             // await t.sleep();
         });
     }
 
-    rule(rules, li) {
+    rule(url, rules, $, d) {
         var t = this;
-        t.once(rules, function(rule) {
-            // list.forEach(function(li) {
-                rule.url = li.url;
-                t.run(rule, li);
-            // });
-        });
+        var list = {}, data = {};
+        if(_.isArray(rules)) {
+            for (var i in rules) {
+                var rule = rules[i];
+                if (rule.list) {
+                    if (rule.key) {
+                        list[rule.key] = t.list(rule, $);
+                        if (d) {
+                            d = _.merge(d, list);
+                        } else {
+                            d = list;
+                        }
+                    } else {
+                        list = t.list(rule, $);
+                        list.forEach(function (li) {
+                            if (li.url) {
+                                li.url = t.url(url, li.url);
+                                if (rule.links) {
+                                    t.once(rule.links, function (r) {
+                                        r.url = li.url;
+                                        // console.log(rule, li);
+                                        if (!r.key) {
+                                            t.run(r, li);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    data = t.data(rule, $);
+                    if (d) {
+                        d = _.merge(d, data);
+                    } else {
+                        d = data;
+                    }
+                }
+            }
+        } else {
+            var rule = rules;
+            if (rule.list) {
+                if (rule.key) {
+                    list[rule.key] = t.list(rule, $);
+                    if (d) {
+                        d = _.merge(d, list);
+                    } else {
+                        d = list;
+                    }
+                } else {
+                    list = t.list(rule, $);
+                    list.forEach(function (li) {
+                        if (li.url) {
+                            li.url = t.url(url, li.url);
+                            if (rule.links) {
+                                t.once(rule.links, function (r) {
+                                    r.url = li.url;
+                                    // console.log(rule, li);
+                                    if (!r.key) {
+                                        t.run(r, li);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            } else {
+                data = t.data(rule, $);
+                if (d) {
+                    d = _.merge(d, data);
+                } else {
+                    d = data;
+                }
+            }
+        }
+        return d;
     }
 
     link(link, data) {

@@ -3,14 +3,18 @@
  */
 "use strict";
 
-var Spider = require('../net.js');
+var Spider = require('../spider.js');
 
 // console.profile('性能分析器');
 var spider = new Spider({
 	init: {
-		debug: true
+		debug: true,
+		timeout: 1000,
+		retry: 1,
+        threads: 10,
+        retryIsJump: true
 	},
-	rules: [{
+	links: [{
 		title: '破晓列表',
 		url: 'http://www.iqiyi.com/lib/dianying/%2C%2C_4_1.html',
 		rules: [{
@@ -25,7 +29,7 @@ var spider = new Spider({
 					text: 'p.site-piclist_info_title a'
 				}
 			},
-			link: [{
+			links: [{
 				title: '内容',
 				rules: [{
 					rule: {
