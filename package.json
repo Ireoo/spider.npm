@@ -1,6 +1,6 @@
 {
   "name": "spider.io",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "sipder network with nodejs",
   "main": "spider.js",
   "scripts": {
@@ -13,9 +13,11 @@
   "keywords": [
     "spider",
     "network spider",
-    "网络采集工具"
+    "网络采集工具",
+    "cookie",
+    "spider.io"
   ],
-  "author": "S2",
+  "author": "ireoo",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Ireoo/spider.npm/issues"

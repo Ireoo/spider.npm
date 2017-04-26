@@ -2,54 +2,43 @@
 
 var needle = require('needle');
 var cheerio = require('cheerio');
-var config = require('./config');
+var config = require('./test/config');
 var _ = require('lodash');
 var urlResolve = require('url').resolve;
 var async = require('async');
 var Queue = require('promise-queue-plus');
 
+console.log(config);
+
 class Spider {
     constructor(options) {
         if(options) {
             this.init = _.merge({
-                debug: true,
+                debug: false,
                 delay: 3000,
                 timeout: 3000,
-                threads: 1,
-                retry: 1,
-                retryIsJump: true
+                threads: 10
             }, options.init);
             if (options.callback) this.cb = options.callback;
+            //实列化一个最大并发为1的队列
+            this.queue = new Queue(this.init.threads,{
+                "queueStart": function(queue){}
+                ,"queueEnd": function(queue){}
+                ,"workAdd": function(item, queue){}
+                ,"workResolve": function(value, queue){}
+                ,"workReject": function(reason, queue){}
+                ,"workFinally": function(queue){}
+                ,"retry": 1               //Number of retries
+                ,"retryIsJump": true      //retry now?
+                ,"timeout": this.init.timeout           //The timeout period
+            });
+            this.headers = options.headers || {
+                    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
+                };
+            if (options.run) this.run(options.links || config);
         } else {
-            this.init = {
-                debug: true,
-                delay: 3000,
-                timeout: 3000,
-                threads: 1,
-                retry: 1,
-                retryIsJump: true
-            };
-            this.cb = function() {}
+            console.log('没有设置基础参数!');
         }
-        //实列化一个最大并发为1的队列
-        this.queue = new Queue(this.init.threads,{
-            "queueStart": function(queue){}
-            ,"queueEnd": function(queue){}
-            ,"workAdd": function(item, queue){}
-            ,"workResolve": function(value, queue){}
-            ,"workReject": function(reason, queue){}
-            ,"workFinally": function(queue){}
-            ,"retry": this.init.retry               //Number of retries
-            ,"retryIsJump": this.init.retryIsJump     //retry now?
-            ,"timeout": this.init.timeout           //The timeout period
-        });
-        needle.defaults({
-            // open_timeout: this.init.timeout,
-            // read_timeout: this.init.timeout,
-            // timeout: this.init.timeout,
-            user_agent: 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322)'
-        });
-        if (options.run) this.run(options.links);
         return this;
     }
 
@@ -63,31 +52,6 @@ class Spider {
                 // console.log(once.link);
                 var d = t.rule(once.url, once.rules, $, input);
                 if(d !== undefined) t.cb(d);
-                /**
-                 t.once(once.rules, function(rule) {
-                    if(rule.list) {
-                        var list = t.list(rule, $);
-                        list.forEach(function(li) {
-                            if(li.url) {
-                                li.url = t.url(once.url, li.url);
-                                if(rule.link) {
-                                    t.once(rule.link, function(rule) {
-                                        rule.url = li.url;
-                                        // console.log(rule, li);
-                                        if(!rule.key) {
-                                            t.run(rule, li);
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    } else {
-                        var d = _.merge(data, t.data(rule, $));
-                        t.cb(d);
-                        // console.log(JSON.stringify(data));
-                    }
-                });
-                 */
             });
             // await t.sleep();
         });
@@ -151,7 +115,6 @@ class Spider {
                             if (rule.links) {
                                 t.once(rule.links, function (r) {
                                     r.url = li.url;
-                                    // console.log(rule, li);
                                     if (!r.key) {
                                         t.run(r, li);
                                     }
@@ -192,7 +155,6 @@ class Spider {
                 } else {
                     var d = _.merge(data, t.data(rule, $));
                     t.cb(d);
-                    // console.log(JSON.stringify(data));
                 }
             });
         });
@@ -203,24 +165,43 @@ class Spider {
         var list = [];
         $(rules.list).each(function() {
             var one = {};
-            // rules.rule.forEach(function(v, k) {
             for( var k in rules.rule) {
-                switch (rules.rule[k].type) {
-                    case 'text':
-                        one[k] = $(this).find(rules.rule[k].text).text();
-                        break;
+                if(rules.rule[k].text && rules.rule[k].text != '') {
+                    switch (rules.rule[k].type) {
+                        case 'text':
+                            one[k] = $(this).find(rules.rule[k].text).text();
+                            break;
 
-                    case 'html':
-                        one[k] = $(this).find(rules.rule[k].text).html();
-                        break;
+                        case 'html':
+                            one[k] = $(this).find(rules.rule[k].text).html();
+                            break;
 
-                    case 'val':
-                        one[k] = $(this).find(rules.rule[k].text).val();
-                        break;
+                        case 'val':
+                            one[k] = $(this).find(rules.rule[k].text).val();
+                            break;
 
-                    default:
-                        one[k] = $(this).find(rules.rule[k].text).attr(rules.rule[k].type);
-                        break;
+                        default:
+                            one[k] = $(this).find(rules.rule[k].text).attr(rules.rule[k].type);
+                            break;
+                    }
+                } else {
+                    switch (rules.rule[k].type) {
+                        case 'text':
+                            one[k] = $(this).text();
+                            break;
+
+                        case 'html':
+                            one[k] = $(this).html();
+                            break;
+
+                        case 'val':
+                            one[k] = $(this).val();
+                            break;
+
+                        default:
+                            one[k] = $(this).attr(rules.rule[k].type);
+                            break;
+                    }
                 }
             }
             list.push(one);
@@ -229,9 +210,7 @@ class Spider {
     }
 
     data(rules, $) {
-        // console.log(rules);
         var one = {};
-        // rules.rule.forEach(function(v, k) {
         for(var k in rules.rule) {
             switch (rules.rule[k].type) {
                 case 'text':
@@ -251,8 +230,6 @@ class Spider {
                     break;
             }
         }
-        // var l = {};
-        // l[rules.rule.key] = one;
         return one;
     }
 
@@ -271,17 +248,20 @@ class Spider {
         if (t.init.debug) console.time("[+] [" + url + "]网页获取时间");
         this.queue.go(t.thread_get_html,[url]).then(function(data) {
             if (t.init.debug) console.timeEnd("[+] [" + url + "]网页获取时间");
+            if (t.init.debug == 'html') console.info(data.html());
             cb(data);
         }, function(err) {
             console.error("[-] [" + url + "]获取失败,重试中!!!");
             t.html(url, cb);
         });
-        // await this.thread_get_html(url).then(cb);
     }
 
     thread_get_html(url) {
+        var t = this;
         return new Promise(function (resolve, reject) {
-            needle.get(url, function(err, res) {
+            needle.get(url, t.headers || {
+                    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
+                }, function(err, res) {
                 if(!err) resolve(cheerio.load(res.body));
             });
         });
