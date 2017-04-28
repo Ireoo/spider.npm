@@ -20,7 +20,8 @@ class Spider {
                 debug: self.init.debug,
                 maxConnections : self.init.threads,
                 timeout: self.init.timeout,
-                rateLimits: self.init.delay
+                rateLimits: self.init.delay,
+                onDrain: options.done
             });
             if (options.run) self.run(options.links || config);
         } else {
