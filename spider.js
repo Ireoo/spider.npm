@@ -37,13 +37,13 @@ class Spider {
         var self = this;
         self.once(links, function(once) {
             self.html(once.url, function($) {
-                var d = self.rule(once.url, once.rules, $, input);
+                var d = self.rule(once.hash, once.url, once.rules, $, input);
                 if(d !== undefined) self.cb(once.hash, d);
             });
         });
     }
 
-    rule(url, rules, $, d) {
+    rule(hash, url, rules, $, d) {
         var self = this;
         var list = {}, data = {};
         if(_.isArray(rules)) {
@@ -64,6 +64,7 @@ class Spider {
                                 li.url = self.url(url, li.url);
                                 if (rule.links) {
                                     self.once(rule.links, function (r) {
+                                        r.hash = hash;
                                         r.url = li.url;
                                         if (!r.key) {
                                             self.run(r, li);
@@ -106,6 +107,7 @@ class Spider {
                             li.url = self.url(url, li.url);
                             if (rule.links) {
                                 self.once(rule.links, function (r) {
+                                    r.hash = hash;
                                     r.url = li.url;
                                     if (!r.key) {
                                         self.run(r, li);
@@ -132,32 +134,6 @@ class Spider {
             }
         }
         return d;
-    }
-
-    link(link, data) {
-        var self = this;
-        self.html(link.url, function($) {
-            self.once(link.rules, function(rule) {
-                if(rule.list) {
-                    var list = self.list(rule, $);
-                    list.forEach(function(li) {
-                        if(li.url) {
-                            li.url = self.url(link.url, li.url);
-                            if(rule.links) {
-                                console.log(li.url);
-                                self.run(rule.links, li);
-                            }
-                        }
-                    });
-                    if(!rule.links) {
-                        self.cb(list);
-                    }
-                } else {
-                    var d = _.merge(data, self.data(rule, $));
-                    self.cb(d);
-                }
-            });
-        });
     }
 
     list(rules, $) {
