@@ -14,7 +14,7 @@ class Spider {
                 delay: 0,
                 timeout: 3000,
                 threads: 10,
-                userAgent: 'spider.io with Node.js'
+                userAgent: 'spider.io with Node.js(https://www.npmjs.com/package/spider.io)'
             }, options.init);
             if (options.callback) self.cb = options.callback;
             self.c = new crawler({

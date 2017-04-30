@@ -1,5 +1,5 @@
 # Spider.io
-网络爬虫类库,基本可以实现自定义规则大部分网站
+极简网络蜘蛛爬虫，适用任何网站，只需设置一条规则，就可以把你想要网站上的内容整理出来，非常方便，简单！
 
 ## 最新更新
 1. 优化核心程序，能够访问更多的网页<br>
@@ -9,6 +9,10 @@
 1. 添加一些规则示例（在test目录）使用时不设置links将自动运行示例
 
 ## 使用说明
+```code
+npm install spider.io --save
+```
+
 ```javascript
 var spider = require('spider.io');
 spider({
