@@ -38,7 +38,7 @@ class Spider {
         self.once(links, function(once) {
             self.html(once.url, function($) {
                 var d = self.rule(once.url, once.rules, $, input);
-                if(d !== undefined) self.cb(d);
+                if(d !== undefined) self.cb(once.hash, d);
             });
         });
     }
