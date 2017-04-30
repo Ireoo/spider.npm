@@ -13,10 +13,12 @@ class Spider {
                 debug: false,
                 delay: 0,
                 timeout: 3000,
-                threads: 10
+                threads: 10,
+                userAgent: 'spider.io with Node.js'
             }, options.init);
             if (options.callback) self.cb = options.callback;
             self.c = new crawler({
+                userAgent: self.init.userAgent,
                 debug: self.init.debug,
                 maxConnections : self.init.threads,
                 timeout: self.init.timeout,
