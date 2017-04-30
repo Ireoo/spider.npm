@@ -66,15 +66,16 @@ class Spider {
                                             self.run(r, li);
                                         }
                                     });
-                                } else {
-                                    if (d) {
-                                        d = _.merge(d, data);
-                                    } else {
-                                        d = data;
-                                    }
                                 }
                             }
                         });
+                        if(!rule.links) {
+                            if (d) {
+                                d = _.merge(d, list);
+                            } else {
+                                d = list;
+                            }
+                        }
                     }
                 } else {
                     data = self.data(rule, $);
@@ -107,15 +108,16 @@ class Spider {
                                         self.run(r, li);
                                     }
                                 });
-                            } else {
-                                if (d) {
-                                    d = _.merge(d, data);
-                                } else {
-                                    d = data;
-                                }
                             }
                         }
                     });
+                    if(!rule.links) {
+                        if (d) {
+                            d = _.merge(d, list);
+                        } else {
+                            d = list;
+                        }
+                    }
                 }
             } else {
                 data = self.data(rule, $);
