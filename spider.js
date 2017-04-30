@@ -146,43 +146,47 @@ class Spider {
     list(rules, $) {
         var list = [];
         $(rules.list).each(function() {
-            var one = {};
-            for( var k in rules.rule) {
-                if(rules.rule[k].text && rules.rule[k].text != '') {
-                    switch (rules.rule[k].type) {
-                        case 'text':
-                            if($(this).find(rules.rule[k].text).text()) one[k] = $(this).find(rules.rule[k].text).text();
-                            break;
+            if(_.isString(rules.rule)) {
+                var one = $(this).attr(rules.rule);
+            } else {
+                var one = {};
+                for (var k in rules.rule) {
+                    if (rules.rule[k].text && rules.rule[k].text != '') {
+                        switch (rules.rule[k].type) {
+                            case 'text':
+                                if ($(this).find(rules.rule[k].text).text()) one[k] = $(this).find(rules.rule[k].text).text();
+                                break;
 
-                        case 'html':
-                            if($(this).find(rules.rule[k].text).html()) one[k] = $(this).find(rules.rule[k].text).html();
-                            break;
+                            case 'html':
+                                if ($(this).find(rules.rule[k].text).html()) one[k] = $(this).find(rules.rule[k].text).html();
+                                break;
 
-                        case 'val':
-                            if($(this).find(rules.rule[k].text).val()) one[k] = $(this).find(rules.rule[k].text).val();
-                            break;
+                            case 'val':
+                                if ($(this).find(rules.rule[k].text).val()) one[k] = $(this).find(rules.rule[k].text).val();
+                                break;
 
-                        default:
-                            if($(this).find(rules.rule[k].text).attr(rules.rule[k].type)) one[k] = $(this).find(rules.rule[k].text).attr(rules.rule[k].type);
-                            break;
-                    }
-                } else {
-                    switch (rules.rule[k].type) {
-                        case 'text':
-                            if($(this).text()) one[k] = $(this).text();
-                            break;
+                            default:
+                                if ($(this).find(rules.rule[k].text).attr(rules.rule[k].type)) one[k] = $(this).find(rules.rule[k].text).attr(rules.rule[k].type);
+                                break;
+                        }
+                    } else {
+                        switch (rules.rule[k].type) {
+                            case 'text':
+                                if ($(this).text()) one[k] = $(this).text();
+                                break;
 
-                        case 'html':
-                            if($(this).html()) one[k] = $(this).html();
-                            break;
+                            case 'html':
+                                if ($(this).html()) one[k] = $(this).html();
+                                break;
 
-                        case 'val':
-                            if($(this).val()) one[k] = $(this).val();
-                            break;
+                            case 'val':
+                                if ($(this).val()) one[k] = $(this).val();
+                                break;
 
-                        default:
-                            if($(this).attr(rules.rule[k].type)) one[k] = $(this).attr(rules.rule[k].type);
-                            break;
+                            default:
+                                if ($(this).attr(rules.rule[k].type)) one[k] = $(this).attr(rules.rule[k].type);
+                                break;
+                        }
                     }
                 }
             }
