@@ -227,8 +227,10 @@ class Spider {
         self.c.queue([{
             uri: url,
             callback: function (error, result, $) {
-                if($) {
+                if(!error && $) {
                     cb($);
+                } else {
+                    html(url, cb);
                 }
             }
         }]);
