@@ -66,6 +66,12 @@ class Spider {
                                             self.run(r, li);
                                         }
                                     });
+                                } else {
+                                    if (d) {
+                                        d = _.merge(d, data);
+                                    } else {
+                                        d = data;
+                                    }
                                 }
                             }
                         });
@@ -101,6 +107,12 @@ class Spider {
                                         self.run(r, li);
                                     }
                                 });
+                            } else {
+                                if (d) {
+                                    d = _.merge(d, data);
+                                } else {
+                                    d = data;
+                                }
                             }
                         }
                     });
