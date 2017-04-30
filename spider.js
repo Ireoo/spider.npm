@@ -21,7 +21,8 @@ class Spider {
                 maxConnections : self.init.threads,
                 timeout: self.init.timeout,
                 rateLimits: self.init.delay,
-                onDrain: options.done
+                onDrain: options.done,
+                forceUTF8: true
             });
             if (options.run) self.run(options.links || config);
         } else {
