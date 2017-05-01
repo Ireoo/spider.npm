@@ -146,6 +146,7 @@ class Spider {
     }
 
     list(rules, $) {
+        var self = this;
         var list = [];
         $(rules.list).each(function() {
             if (rules.cb) {
@@ -156,7 +157,7 @@ class Spider {
                 } else {
                     var one = {};
                     for (var k in rules.rule) {
-                        one[k] = dataRule(rules.rule[k], $);
+                        one[k] = self.dataRule(rules.rule[k], $);
                     }
                 }
             }
@@ -166,12 +167,13 @@ class Spider {
     }
 
     data(rules, $) {
+        var self = this;
         if (rules.cb) {
             return rule.cb($);
         } else {
             var one = {};
             for (var k in rules.rule) {
-                one[k] = dataRule(rules.rule[k], $);
+                one[k] = self.dataRule(rules.rule[k], $);
             }
             return one;
         }
@@ -215,7 +217,6 @@ class Spider {
                     break;
             }
         }
-
     }
 
     once(more, cb) {
