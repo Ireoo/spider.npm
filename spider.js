@@ -19,7 +19,7 @@ class Spider {
                 skipDuplicates: true,
                 jQuery: true,
                 utf8: false,
-                userAgent: 'spider.io with Node.js(https://www.npmjs.com/package/spider.io)'
+                userAgent: 'Mozilla/5.0 (compatible; spider.io/4.0+; +https://www.npmjs.com/package/spider.io)'
             }, options.init);
             if (options.callback) self.cb = options.callback;
             self.c = new crawler({
