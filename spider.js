@@ -18,6 +18,7 @@ class Spider {
                 cache: false,
                 skipDuplicates: true,
                 jQuery: true,
+                utf8: false,
                 userAgent: 'spider.io with Node.js(https://www.npmjs.com/package/spider.io)'
             }, options.init);
             if (options.callback) self.cb = options.callback;
@@ -28,7 +29,7 @@ class Spider {
                 timeout: self.init.timeout,
                 rateLimits: self.init.delay,
                 onDrain: options.done,
-                forceUTF8: true,
+                forceUTF8: self.init.utf8,
                 retries: self.init.retries,
                 cache: self.init.cache,
                 skipDuplicates: self.init.skipDuplicates,
