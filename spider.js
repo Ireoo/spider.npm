@@ -76,7 +76,6 @@ class Spider {
             once.url.forEach(function(v, i) {
                 var r = once;
                 r.url = v;
-                console.log(r);
                 cb(r);
             });
         }
