@@ -145,6 +145,7 @@ class Spider {
     }
 
     list(rules, $) {
+        if(rules.cb) return rules.cb($);
         var list = [];
         $(rules.list).each(function() {
             if(_.isString(rules.rule)) {
@@ -197,6 +198,7 @@ class Spider {
     }
 
     data(rules, $) {
+        if(rules.cb) return rules.cb($);
         var one = {};
         for(var k in rules.rule) {
             switch (rules.rule[k].type) {
