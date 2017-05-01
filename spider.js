@@ -50,6 +50,7 @@ class Spider {
                 if(d !== undefined) self.cb(once.hash || false, d);
             });
         });
+        return self;
     }
 
     rule(hash, url, rules, $, d) {
