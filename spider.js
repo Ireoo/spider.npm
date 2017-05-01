@@ -150,7 +150,7 @@ class Spider {
         var list = [];
         $(rules.list).each(function() {
             if (rules.cb) {
-                var one = rule.cb($(this));
+                var one = rules.cb($(this));
             } else {
                 if (_.isString(rules.rule)) {
                     var one = $(this).attr(rules.rule);
@@ -169,7 +169,7 @@ class Spider {
     data(rules, $) {
         var self = this;
         if (rules.cb) {
-            return rule.cb($);
+            return rules.cb($);
         } else {
             var one = {};
             for (var k in rules.rule) {
