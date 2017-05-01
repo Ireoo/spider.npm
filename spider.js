@@ -19,6 +19,7 @@ class Spider {
                 skipDuplicates: true,
                 jQuery: true,
                 utf8: false,
+                loop: false,
                 userAgent: 'Mozilla/5.0 (compatible; spider.io/4.0+; +https://www.npmjs.com/package/spider.io)'
             }, options.init);
             if (options.callback) self.cb = options.callback;
@@ -28,7 +29,10 @@ class Spider {
                 maxConnections: self.init.threads,
                 timeout: self.init.timeout,
                 rateLimits: self.init.delay,
-                onDrain: options.done,
+                onDrain: function() {
+                    if (self.init.loop) self.run(options.links);
+                    options.done();
+                },
                 forceUTF8: self.init.utf8,
                 retries: self.init.retries,
                 cache: self.init.cache,
@@ -44,19 +48,45 @@ class Spider {
 
     run(links, input) {
         var self = this;
-        self.once(links, function(once) {
-            self.html(once.url, function($) {
-                var d = self.rule(once.hash || false, once.url, once.rules, $, input);
-                if(d !== undefined) self.cb(once.hash || false, d);
+        self.once(links, function(one) {
+            self.urls(one, function(once) {
+                if (once.max) {
+                    for (var g = once.min || 1; g <= once.max; g++) {
+                        var url = once.url.replace(/{i}/, g);
+                        self.html(url, function($) {
+                            var d = self.rule(once.hash || false, url, once.rules, $, input);
+                            if (d !== undefined) self.cb(once.hash || false, d);
+                        });
+                    }
+                } else {
+                    self.html(once.url, function($) {
+                        var d = self.rule(once.hash || false, once.url, once.rules, $, input);
+                        if (d !== undefined) self.cb(once.hash || false, d);
+                    });
+                }
             });
         });
         return self;
     }
 
+    urls(once, cb) {
+        if (_.isString(once.url)) {
+            cb(once);
+        } else {
+            once.url.forEach(function(v, i) {
+                var r = once;
+                r.url = v;
+                console.log(r);
+                cb(r);
+            });
+        }
+    }
+
     rule(hash, url, rules, $, d) {
         var self = this;
-        var list = {}, data = {};
-        if(_.isArray(rules)) {
+        var list = {},
+            data = {};
+        if (_.isArray(rules)) {
             for (var i in rules) {
                 var rule = rules[i];
                 if (rule.list) {
@@ -69,11 +99,11 @@ class Spider {
                         }
                     } else {
                         list = self.list(rule, $);
-                        list.forEach(function (li) {
+                        list.forEach(function(li) {
                             if (li.url) {
                                 li.url = self.url(url, li.url);
                                 if (rule.links) {
-                                    self.once(rule.links, function (r) {
+                                    self.once(rule.links, function(r) {
                                         r.hash = hash;
                                         r.url = li.url;
                                         if (!r.key) {
@@ -83,7 +113,7 @@ class Spider {
                                 }
                             }
                         });
-                        if(!rule.links) {
+                        if (!rule.links) {
                             if (d) {
                                 d = _.merge(d, list);
                             } else {
@@ -112,11 +142,11 @@ class Spider {
                     }
                 } else {
                     list = self.list(rule, $);
-                    list.forEach(function (li) {
+                    list.forEach(function(li) {
                         if (li.url) {
                             li.url = self.url(url, li.url);
                             if (rule.links) {
-                                self.once(rule.links, function (r) {
+                                self.once(rule.links, function(r) {
                                     r.hash = hash;
                                     r.url = li.url;
                                     if (!r.key) {
@@ -126,7 +156,7 @@ class Spider {
                             }
                         }
                     });
-                    if(!rule.links) {
+                    if (!rule.links) {
                         if (d) {
                             d = _.merge(d, list);
                         } else {
@@ -147,10 +177,10 @@ class Spider {
     }
 
     list(rules, $) {
-        if(rules.cb) return rules.cb($);
+        if (rules.cb) return rules.cb($);
         var list = [];
         $(rules.list).each(function() {
-            if(_.isString(rules.rule)) {
+            if (_.isString(rules.rule)) {
                 var one = $(this).attr(rules.rule);
             } else {
                 var one = {};
@@ -200,9 +230,9 @@ class Spider {
     }
 
     data(rules, $) {
-        if(rules.cb) return rules.cb($);
+        if (rules.cb) return rules.cb($);
         var one = {};
-        for(var k in rules.rule) {
+        for (var k in rules.rule) {
             switch (rules.rule[k].type) {
                 case 'text':
                     if ($(rules.rule[k].text).text()) one[k] = $(rules.rule[k].text).text();
@@ -225,7 +255,7 @@ class Spider {
     }
 
     once(more, cb) {
-        if(_.isArray(more)) {
+        if (_.isArray(more)) {
             more.forEach(function(once) {
                 cb(once);
             });
@@ -238,8 +268,8 @@ class Spider {
         var self = this;
         self.c.queue([{
             uri: url,
-            callback: function (error, result, $) {
-                if(!error && $) {
+            callback: function(error, result, $) {
+                if (!error && $) {
                     cb($);
                 } else {
                     html(url, cb);
