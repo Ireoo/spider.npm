@@ -14,6 +14,9 @@ class Spider {
                 delay: 0,
                 timeout: 3000,
                 threads: 10,
+                retries: 10,
+                cache: false,
+                skipDuplicates: true,
                 userAgent: 'spider.io with Node.js(https://www.npmjs.com/package/spider.io)'
             }, options.init);
             if (options.callback) self.cb = options.callback;
@@ -24,7 +27,10 @@ class Spider {
                 timeout: self.init.timeout,
                 rateLimits: self.init.delay,
                 onDrain: options.done,
-                forceUTF8: true
+                forceUTF8: true,
+                retries: self.init.retries,
+                cache: self.init.cache,
+                skipDuplicates: self.init.skipDuplicates
             });
             if (options.run) self.run(options.links || config);
         } else {
