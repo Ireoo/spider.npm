@@ -150,18 +150,18 @@ class Spider {
         var self = this;
         var list = [];
         $(rules.list).each(function() {
-            if (rules.cb) {
-                var one = rules.cb($(this));
+            // if (rules.cb) {
+            //     var one = rules.cb($(this));
+            // } else {
+            if (_.isString(rules.rule)) {
+                var one = $(this).attr(rules.rule);
             } else {
-                if (_.isString(rules.rule)) {
-                    var one = $(this).attr(rules.rule);
-                } else {
-                    var one = {};
-                    for (var k in rules.rule) {
-                        one[k] = self.dataRule(rules.rule[k], $);
-                    }
+                var one = {};
+                for (var k in rules.rule) {
+                    one[k] = self.dataRule(rules.rule[k], $);
                 }
             }
+            // }
             list.push(one);
         });
         return list;
@@ -169,15 +169,15 @@ class Spider {
 
     data(rules, $) {
         var self = this;
-        if (rules.cb) {
-            return rules.cb($);
-        } else {
-            var one = {};
-            for (var k in rules.rule) {
-                one[k] = self.dataRule(rules.rule[k], $);
-            }
-            return one;
+        // if (rules.cb) {
+        //     return rules.cb($);
+        // } else {
+        var one = {};
+        for (var k in rules.rule) {
+            one[k] = self.dataRule(rules.rule[k], $);
         }
+        return one;
+        // }
     }
 
     dataRule(rule, $) {
