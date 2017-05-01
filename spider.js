@@ -45,8 +45,8 @@ class Spider {
         var self = this;
         self.once(links, function(once) {
             self.html(once.url, function($) {
-                var d = self.rule(once.hash, once.url, once.rules, $, input);
-                if(d !== undefined) self.cb(once.hash, d);
+                var d = self.rule(once.hash || false, once.url, once.rules, $, input);
+                if(d !== undefined) self.cb(once.hash || false, d);
             });
         });
     }
