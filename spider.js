@@ -8,7 +8,7 @@ var crawler = require('./lib/node-web-crawler');
 class Spider {
     constructor(options) {
         var self = this;
-        if(options) {
+        if (options) {
             self.init = _.merge({
                 debug: false,
                 delay: 0,
@@ -18,17 +18,18 @@ class Spider {
                 cache: false,
                 skipDuplicates: true,
                 jQuery: true,
+                utf8: false,
                 userAgent: 'spider.io with Node.js(https://www.npmjs.com/package/spider.io)'
             }, options.init);
             if (options.callback) self.cb = options.callback;
             self.c = new crawler({
                 userAgent: self.init.userAgent,
                 debug: self.init.debug,
-                maxConnections : self.init.threads,
+                maxConnections: self.init.threads,
                 timeout: self.init.timeout,
                 rateLimits: self.init.delay,
                 onDrain: options.done,
-                forceUTF8: true,
+                forceUTF8: self.init.utf8,
                 retries: self.init.retries,
                 cache: self.init.cache,
                 skipDuplicates: self.init.skipDuplicates,
