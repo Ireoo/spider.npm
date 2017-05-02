@@ -271,7 +271,7 @@ class Spider {
                 if (!error && $) {
                     cb($);
                 } else {
-                    html(url, cb);
+                    self.html(url, cb);
                 }
             }
         }]);
