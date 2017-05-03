@@ -3,7 +3,7 @@
 var config = require('./test/config');
 var _ = require('lodash');
 var urlResolve = require('url').resolve;
-var crawler = require('./lib/node-web-crawler');
+var crawler = require('./lib/crawler');
 
 class Spider {
     constructor(options) {
@@ -267,7 +267,7 @@ class Spider {
         var self = this;
         self.c.queue([{
             uri: url,
-            callback: function(error, result, $) {
+            callback: function (error, result, $) {
                 if (!error && $) {
                     cb($);
                 } else {
