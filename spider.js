@@ -3,7 +3,8 @@
 var config = require('./test/config');
 var _ = require('lodash');
 var urlResolve = require('url').resolve;
-var crawler = require('./lib/crawler');
+// var crawler = require('./lib/crawler');
+var crawler = require('node-web-crawler');
 
 class Spider {
     constructor(options) {
