@@ -3,8 +3,8 @@
 var config = require('./test/config');
 var _ = require('lodash');
 var urlResolve = require('url').resolve;
-// var crawler = require('./lib/crawler');
-var crawler = require('node-web-crawler');
+var crawler = require('./lib/crawler');
+// var crawler = require('node-web-crawler');
 
 class Spider {
     constructor(options) {
@@ -23,7 +23,9 @@ class Spider {
                 loop: false,
                 userAgent: 'Mozilla/5.0 (compatible; spider.io/4.0+; +https://www.npmjs.com/package/spider.io)'
             }, options.init);
+            self.links = options.links;
             if (options.callback) self.cb = options.callback;
+            if (options.done) self.done = options.done;
             self.c = new crawler({
                 userAgent: self.init.userAgent,
                 debug: self.init.debug,
@@ -31,8 +33,10 @@ class Spider {
                 timeout: self.init.timeout,
                 rateLimits: self.init.delay,
                 onDrain: function() {
-                    if (self.init.loop) self.run(options.links);
-                    options.done();
+                    if (self.init.loop) {
+                        new Spider({init: self.init, links: self.links, callback: self.cb, done: self.done, run: true});
+                    }
+                    if (self.done) self.done();
                 },
                 forceUTF8: self.init.utf8,
                 retries: self.init.retries,
@@ -40,7 +44,7 @@ class Spider {
                 skipDuplicates: self.init.skipDuplicates,
                 jQuery: self.init.jQuery
             });
-            if (options.run) self.run(options.links || config);
+            if (options.run) self.run(self.links || config);
         } else {
             console.log('没有设置基础参数!');
         }
@@ -49,7 +53,8 @@ class Spider {
 
     run(links, input) {
         var self = this;
-        self.once(links, function(one) {
+        if(links) self.links = links;
+        self.once(self.links, function(one) {
             self.urls(one, function(once) {
                 if (once.max) {
                     for (var g = once.min || 1; g <= once.max; g++) {
