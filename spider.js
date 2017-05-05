@@ -53,8 +53,8 @@ class Spider {
 
     run(links, input) {
         var self = this;
-        if(links) self.links = links;
-        self.once(self.links, function(one) {
+        // if(links) self.links = links;
+        self.once(links || self.links, function(one) {
             self.urls(one, function(once) {
                 if (once.max) {
                     for (var g = once.min || 1; g <= once.max; g++) {
