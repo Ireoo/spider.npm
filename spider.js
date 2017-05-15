@@ -1,14 +1,14 @@
 "use strict";
 
-var config = require('./test/config');
-var _ = require('lodash');
-var urlResolve = require('url').resolve;
-var crawler = require('./lib/crawler');
+const config = require('./test/config');
+const _ = require('lodash');
+const urlResolve = require('url').resolve;
+const crawler = require('./lib/crawler');
 // var crawler = require('node-web-crawler');
 
 class Spider {
     constructor(options) {
-        var self = this;
+        let self = this;
         if (options) {
             self.init = _.merge({
                 debug: false,
@@ -34,7 +34,7 @@ class Spider {
                 rateLimits: self.init.delay,
                 onDrain: function() {
                     if (self.init.loop) {
-                        new Spider({init: self.init, links: self.links, callback: self.cb, done: self.done, run: true});
+                        new Spider({ init: self.init, links: self.links, callback: self.cb, done: self.done, run: true });
                     }
                     if (self.done) self.done();
                 },
@@ -52,22 +52,23 @@ class Spider {
     }
 
     run(links, input) {
-        var self = this;
+        let self = this;
         // if(links) self.links = links;
         self.once(links || self.links, function(one) {
+            let hash = one.hash;
             self.urls(one, function(once) {
                 if (once.max) {
-                    for (var g = once.min || 1; g <= once.max; g++) {
-                        var url = once.url.replace(/{i}/, g);
+                    for (let g = once.min || 1; g <= once.max; g++) {
+                        let url = once.url.replace(/{i}/, g);
                         self.html(url, function($) {
-                            var d = self.rule(once.hash || false, url, once.rules, $, input);
-                            if (d !== undefined) self.cb(once.hash || false, d);
+                            let d = self.rule(hash || false, url, once.rules, $, input);
+                            if (d !== undefined) self.cb(hash || false, d);
                         });
                     }
                 } else {
                     self.html(once.url, function($) {
-                        var d = self.rule(once.hash || false, once.url, once.rules, $, input);
-                        if (d !== undefined) self.cb(once.hash || false, d);
+                        let d = self.rule(hash || false, once.url, once.rules, $, input);
+                        if (d !== undefined) self.cb(hash || false, d);
                     });
                 }
             });
@@ -80,7 +81,7 @@ class Spider {
             cb(once);
         } else {
             once.url.forEach(function(v, i) {
-                var r = once;
+                let r = once;
                 r.url = v;
                 cb(r);
             });
@@ -88,12 +89,12 @@ class Spider {
     }
 
     rule(hash, url, rules, $, d) {
-        var self = this;
-        var list = {},
+        let self = this;
+        let list = {},
             data = {};
         if (_.isArray(rules)) {
-            for (var i in rules) {
-                var rule = rules[i];
+            for (let i in rules) {
+                let rule = rules[i];
                 if (rule.list) {
                     if (rule.key) {
                         list[rule.key] = self.list(rule, $);
@@ -136,7 +137,7 @@ class Spider {
                 }
             }
         } else {
-            var rule = rules;
+            let rule = rules;
             if (rule.list) {
                 if (rule.key) {
                     list[rule.key] = self.list(rule, $);
@@ -183,12 +184,12 @@ class Spider {
 
     list(rules, $) {
         if (rules.cb) return rules.cb($);
-        var list = [];
+        let list = [];
         $(rules.list).each(function() {
             if (_.isString(rules.rule)) {
-                var one = $(this).attr(rules.rule);
+                let one = $(this).attr(rules.rule);
             } else {
-                var one = {};
+                let one = {};
                 for (var k in rules.rule) {
                     if (rules.rule[k].text && rules.rule[k].text != '') {
                         switch (rules.rule[k].type) {
@@ -236,8 +237,8 @@ class Spider {
 
     data(rules, $) {
         if (rules.cb) return rules.cb($);
-        var one = {};
-        for (var k in rules.rule) {
+        let one = {};
+        for (let k in rules.rule) {
             switch (rules.rule[k].type) {
                 case 'text':
                     if ($(rules.rule[k].text).text()) one[k] = $(rules.rule[k].text).text();
@@ -270,10 +271,10 @@ class Spider {
     }
 
     html(url, cb) {
-        var self = this;
+        let self = this;
         self.c.queue([{
             uri: url,
-            callback: function (error, result, $) {
+            callback: function(error, result, $) {
                 if (!error && $) {
                     cb($);
                 } else {
