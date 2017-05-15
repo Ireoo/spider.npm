@@ -186,10 +186,11 @@ class Spider {
         if (rules.cb) return rules.cb($);
         let list = [];
         $(rules.list).each(function() {
+            let one;
             if (_.isString(rules.rule)) {
-                let one = $(this).attr(rules.rule);
+                one = $(this).attr(rules.rule);
             } else {
-                let one = {};
+                one = {};
                 for (var k in rules.rule) {
                     if (rules.rule[k].text && rules.rule[k].text != '') {
                         switch (rules.rule[k].type) {
