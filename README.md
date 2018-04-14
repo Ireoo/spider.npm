@@ -1,5 +1,7 @@
 # Spider.io
 极简网络蜘蛛爬虫，适用任何网站，只需设置一条规则，就可以把你想要网站上的内容整理出来，非常方便，简单！
+![](https://img.shields.io/npm/v/spider.io.svg)
+![](https://img.shields.io/npm/dm/spider.io.svg)
 
 ## 最新更新
 1. 新添加rules.cb函数，处理复杂的值，最后一定要用return返回
@@ -15,8 +17,8 @@ npm install spider.io --save
 ```
 
 ```javascript
-var spider = require('spider.io');
-spider({
+var Spider = require('spider.io');
+new Spider({
     callback: function(data) {
         console.log(data);
     },
@@ -25,8 +27,8 @@ spider({
 ```
 OR
 ```javascript
-var spider = require('spider.io');
-spider({
+var Spider = require('spider.io');
+new Spider({
     callback: function(data) {
         console.log(data);
     }
