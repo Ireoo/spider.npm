@@ -3,7 +3,7 @@
 const config = require("./test/config");
 const _ = require("lodash");
 const urlResolve = require("url").resolve;
-const base = require("getlibs.io")();
+const base = require("getlibs.io")(__dirname);
 const queuefun = require("queue-fun");
 const Queue = queuefun.Queue();
 const colors = require("colors");
@@ -74,7 +74,7 @@ class Spider {
             if (!link) return;
             let hash = link.hash;
             base.urlsEach(link, once => {
-                self.linkIsSequence(once, async one => {
+                self.linkIsSequence(once, one => {
                     self.Q.go(base.getHtml, [one.url, self.init]).then($ => {
                         let data = {};
                         base.moreEach(one.rules, rule => {
@@ -111,6 +111,8 @@ class Spider {
                                 self.cb(hash || false, d);
                             }
                         });
+                    }).catch(e => {
+                        base.trace(e, self.init.debug);
                     });
                 });
             });
