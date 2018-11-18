@@ -26,7 +26,7 @@ class Spider {
             self.links = options.links || config;
             if (options.callback) self.cb = options.callback;
             if (options.done) self.done = options.done;
-            if (options.run) self.run(self.links);
+
             self.Q = new Queue(self.init.threads, {
                 event_err: err => {
                     base.trace(
@@ -45,6 +45,9 @@ class Spider {
                 retryON: self.init.retrys,
                 retryType: false
             });
+
+            // 是否启动程序
+            if (options.run) self.run(self.links);
         } else {
             console.log("没有设置基础参数!");
         }

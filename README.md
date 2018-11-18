@@ -7,6 +7,9 @@
 
 ## 最新更新
 
+### v5.0.3 [2018/11/18]
+1.  修复程序无法成功启动问题
+
 ### v5.0.0 [2018/4/14]
 1.  弃用 crawler.js, 改用 superagent 模块
 1.  增加 debug 颜色分类
@@ -27,7 +30,7 @@ npm install spider.io --save
 ```
 
 ```javascript
-var Spider = require("spider.io");
+const Spider = require("spider.io");
 new Spider({
 	callback: function(hash, data) {
 		console.log(hash, data);
@@ -39,7 +42,7 @@ new Spider({
 OR
 
 ```javascript
-var Spider = require("spider.io");
+const Spider = require("spider.io");
 new Spider({
 	callback: function(hash, data) {
 		console.log(hash, data);
