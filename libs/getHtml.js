@@ -17,10 +17,15 @@ const getHtml = (url, init) => {
                     `\n${JSON.stringify(res.header, null, 4)}`.grey,
                     init.debug
                 );
-                resolve(cheerio.load(res.text));
+                try {
+                    let $ = cheerio.load(res.text);
+                    resolve($);
+                } catch (e) {
+                    reject(`这个地址 "${url}" 的内容无法被解析!详细错误信息：${e}`);
+                }
             });
         } else {
-            reject(`This url '${url}' is not url!`);
+            reject(`这个地址 "${url}" 不是一个有效的地址!`);
         }
     });
 };
