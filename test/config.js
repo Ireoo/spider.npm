@@ -2,7 +2,7 @@
  * Created by ultra on 2017/4/26.
  */
 
-var iqiyi = {
+const iqiyi = {
     title: "爱奇艺列表",
     hash: "1",
     url: "http://www.iqiyi.com/lib/dianying/,,_11_1.html",

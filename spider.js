@@ -107,12 +107,13 @@ class Spider {
                                     self.go(_links, d);
                                 }
                             });
+                            // console.log(out);
                             if (out) {
                                 self.cb(hash || false, d);
                             }
                         });
                     }).catch(e => {
-                        base.trace(e, self.init.debug);
+                        // base.trace(e, self.init.debug);
                     });
                 });
             });
