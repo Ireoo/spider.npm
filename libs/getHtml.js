@@ -1,24 +1,20 @@
 const path = require("path");
 
-// const superagent = require("superagent");
-// require('superagent-charset')(superagent);
 const cheerio = require("cheerio");
 const colors = require("colors");
 const trace = require("./trace");
 const {
-    execSync,
-    exec,
-    execFileSync,
-    execFile
+    execFileSync
 } = require("child_process");
 
 const getHtml = (url, init) => {
     return new Promise((resolve, reject) => {
         if (/^http/.test(url)) {
             try {
-                let cmd = `${path.join(__dirname, "../bin/html.exe")} ${url}`;
+                let filename = `../bin/html-${process.platform}${process.platform === 'win32' ? '.exe' : ''}`;
+                let cmd = path.join(__dirname, filename);
                 let startTime = new Date().getTime();
-                let result = execFileSync(path.join(__dirname, "../bin/html.exe"), [url]).toString();
+                let result = execFileSync(cmd, [url]).toString();
                 let stopTime = new Date().getTime();
                 trace(
                     `${url} is use time: ${stopTime - startTime}ms.`.green,
@@ -33,35 +29,6 @@ const getHtml = (url, init) => {
         }
     });
 };
-
-// const getHtml = (url, init) => {
-//     return new Promise((resolve, reject) => {
-//         if (/^http/.test(url)) {
-//             try {
-//                 let cmd = `${path.join(__dirname, "../bin/html.exe")} ${url}`;
-//                 let startTime = new Date().getTime();
-//                 execFile(cmd, (error, stdout, stderr) => {
-//                     if (error) {
-//                         reject(stderr.toString());
-//                     } else {
-//                         let stopTime = new Date().getTime();
-//                         trace(
-//                             `${url} is use time: ${stopTime - startTime}ms.`.green,
-//                             init.debug
-//                         );
-//                         console.log(stdout.toString())
-//                         resolve(cheerio.load(stdout.toString()));
-//                     }
-//                 });
-
-//             } catch (ex) {
-//                 reject(ex.message);
-//             }
-//         } else {
-//             reject(`这个地址 "${url}" 不是一个有效的地址!`);
-//         }
-//     });
-// };
 
 const getHtmlWithNightmare = (url, init) => {
     return new Promise((resolve, reject) => {
