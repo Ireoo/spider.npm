@@ -7,6 +7,13 @@
 
 ## 最新更新
 
+### v5.0.8 [2019/7/8]
+
+1. 优化程序
+1. 保证输出的数据不会影响到核心程序的处理
+1. 在 rules 中 cb 增加参数 hash，data
+1. 完善说明文档
+
 ### v5.0.7 [2019/7/7]
 
 1. 修复程序无法识别多条规则，导致每次只显示最后一条的问题
@@ -79,27 +86,64 @@ const options = {
     title: "",
     hash: "",
     url: "",
-    rules: {
-      list: "a",
-      rule: {
-        url: {
-          // 同级包含links的，必须有此参数
-          type: "href",
-          text: ""
+    rules: [
+      // 列表类型的数据，带下一级处理
+      {
+        list: "a",
+        rule: {
+          url: {
+            // 同级包含links的，必须有此参数
+            type: "href",
+            text: ""
+          },
+          title: {
+            type: "text",
+            text: ""
+          }
         },
-        title: {
-          type: "text",
-          text: ""
+        links: []
+      },
+      // 普通类型的数据
+      {
+        rule: {
+          url: {
+            // 同级包含links的，必须有此参数
+            type: "href",
+            text: ""
+          },
+          title: {
+            type: "text",
+            text: ""
+          }
         }
       },
-      links: [],
-      cb: $ => {
-        // $ -> 为格式化的dom对象，可以直接操作，语法规则请查看 jQuery
-        // ...code
-        // 如果同级包含links，必须要有返回值，并且要包含url；可以返回 array 或 object
-        // return [{url: ''}] or {url: ''};
+      // 数组形式的数据
+      {
+        key: "",
+        list: "",
+        rule: {
+          url: {
+            // 同级包含links的，必须有此参数
+            type: "href",
+            text: ""
+          },
+          title: {
+            type: "text",
+            text: ""
+          }
+        }
+      },
+      // 自定义处理返回数据，会合并上一级数据
+      {
+        cb: ($, init) => {
+          // $ -> 为格式化的dom对象，可以直接操作，语法规则请查看 jQuery
+          // init -> {hash, data}
+          // ...code
+          // 如果同级包含links，必须要有返回值，并且要包含url；可以返回 array 或 object
+          // return [{url: ''}] or {url: ''};
+        }
       }
-    }
+    ]
   },
   callback: (hash, data) => {
     // 数据以单条记录返回，并不会一次返回所有值

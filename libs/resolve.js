@@ -1,7 +1,7 @@
 const _ = require("lodash");
 
-const list = (rules, $) => {
-    if (rules.cb) return rules.cb($);
+const list = (rules, $, init) => {
+    if (rules.cb) return rules.cb($, init);
     let list = [];
     $(rules.list).each(function() {
         let one;
@@ -83,8 +83,8 @@ const list = (rules, $) => {
     return list;
 };
 
-const data = (rules, $) => {
-    if (rules.cb) return rules.cb($);
+const data = (rules, $, init) => {
+    if (rules.cb) return rules.cb($, init);
     let data = {};
     for (let k in rules.rule) {
         switch (rules.rule[k].type) {
@@ -99,8 +99,7 @@ const data = (rules, $) => {
                 break;
 
             case "val":
-                if ($(rules.rule[k].text).val())
-                    data[k] = $(rules.rule[k].text).val();
+                if ($(rules.rule[k].text).val()) data[k] = $(rules.rule[k].text).val();
                 break;
 
             default:

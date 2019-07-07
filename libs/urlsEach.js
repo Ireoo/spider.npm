@@ -5,7 +5,7 @@ const urlsEach = (link, cb) => {
         cb(link);
     } else {
         link.url.forEach((v, i) => {
-            let _link = JSON.parse(JSON.stringify(link));
+            let _link = [].concat(link);
             _link.url = v;
             cb(_link);
         });

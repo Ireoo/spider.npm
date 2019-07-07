@@ -82,10 +82,24 @@ class Spider {
                             base.moreEach(one.rules, rule => {
                                 if (rule.key) {
                                     dataOne[rule.key] = rule.list ?
-                                        base.list(rule, $) :
-                                        base.data(rule, $);
+                                        base.list(rule, $, {
+                                            hash,
+                                            data: input
+                                        }) :
+                                        base.data(rule, $, {
+                                            hash,
+                                            data: input
+                                        });
                                 } else {
-                                    dataOne = rule.list ? base.list(rule, $) : base.data(rule, $);
+                                    dataOne = rule.list ?
+                                        base.list(rule, $, {
+                                            hash,
+                                            data: input
+                                        }) :
+                                        base.data(rule, $, {
+                                            hash,
+                                            data: input
+                                        });
                                 }
                                 if (
                                     Object.prototype.toString.call(dataOne) !== "[object Array]"
@@ -119,7 +133,7 @@ class Spider {
                                     }
                                 });
                                 if (out) {
-                                    self.cb(hash || false, d);
+                                    self.cb(hash || false, [].concat(d));
                                 }
                             });
                         })
@@ -139,7 +153,7 @@ class Spider {
     linkIsSequence(link, cb) {
         if (link.max) {
             for (let g = link.min || 1; g <= link.max; g++) {
-                cb(JSON.parse(JSON.stringify(link)).url.replace(/{i}/, g));
+                cb([].concat(link).url.replace(/{i}/, g));
             }
         } else {
             cb(link);
