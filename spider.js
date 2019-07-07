@@ -75,45 +75,57 @@ class Spider {
             let hash = link.hash;
             base.urlsEach(link, once => {
                 self.linkIsSequence(once, one => {
-                    self.Q.go(base.getHtml, [one.url, self.init]).then($ => {
-                        let data = {};
-                        base.moreEach(one.rules, rule => {
-                            if (rule.key) {
-                                data[rule.key] = rule.list ?
-                                    base.list(rule, $) :
-                                    base.data(rule, $);
-                            } else {
-                                data = rule.list ?
-                                    base.list(rule, $) :
-                                    base.data(rule, $);
-                            }
-                        });
-
-                        base.moreEach(data, d => {
-                            for (let i in input) {
-                                d[i] = input[i];
-                            }
-                            let out = true;
+                    self.Q.go(base.getHtml, [one.url, self.init])
+                        .then($ => {
+                            let data = {};
+                            let dataOne = {};
                             base.moreEach(one.rules, rule => {
-                                if (rule.links) {
-                                    out = false;
-                                    let _links = JSON.parse(
-                                        JSON.stringify(rule.links)
-                                    ).map(l => {
-                                        l.url = self.url(one.url, d.url);
-                                        l.hash = link.hash;
-                                        return l;
-                                    });
-                                    self.go(_links, d);
+                                if (rule.key) {
+                                    dataOne[rule.key] = rule.list ?
+                                        base.list(rule, $) :
+                                        base.data(rule, $);
+                                } else {
+                                    dataOne = rule.list ? base.list(rule, $) : base.data(rule, $);
+                                }
+                                if (
+                                    Object.prototype.toString.call(dataOne) !== "[object Array]"
+                                ) {
+                                    for (let k in dataOne) {
+                                        data[k] = dataOne[k];
+                                    }
+                                } else {
+                                    data = dataOne;
                                 }
                             });
-                            if (out) {
-                                self.cb(hash || false, d);
-                            }
+
+                            base.moreEach(data, d => {
+                                for (let i in input) {
+                                    if (!d[i]) d[i] = input[i];
+                                }
+                                let out = true;
+                                base.moreEach(one.rules, rule => {
+                                    if (rule.links) {
+                                        out = false;
+                                        try {
+                                            let _links = [].concat(rule.links).map(l => {
+                                                l.url = self.url(one.url, d.url);
+                                                l.hash = link.hash;
+                                                return l;
+                                            });
+                                            self.go(_links, d);
+                                        } catch (e) {
+                                            console.log(`error`, e);
+                                        }
+                                    }
+                                });
+                                if (out) {
+                                    self.cb(hash || false, d);
+                                }
+                            });
+                        })
+                        .catch(e => {
+                            base.trace(e, self.init.debug);
                         });
-                    }).catch(e => {
-                        base.trace(e, self.init.debug);
-                    });
                 });
             });
         });
