@@ -133,7 +133,7 @@ class Spider {
                                     }
                                 });
                                 if (out) {
-                                    self.cb(hash || false, [].concat(d));
+                                    self.cb(hash || false, JSON.parse(JSON.stringify(d)));
                                 }
                             });
                         })
